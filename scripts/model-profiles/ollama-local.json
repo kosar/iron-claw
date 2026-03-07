@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "id": "ollama-local",
+    "name": "Ollama Local Only",
+    "description": "No cloud API key needed. Runs entirely on your machine.",
+    "cost_tier": "free",
+    "requires_api_key": false,
+    "env_var": null,
+    "env_label": null,
+    "env_hint": null
+  },
+  "providers": {},
+  "auth_profile": null,
+  "agent_defaults": {
+    "primary": "ollama/qwen3:14b",
+    "fallbacks": ["ollama/qwen3:8b"],
+    "heartbeat_model": "ollama/qwen3:8b"
+  },
+  "identity_model_line": "Qwen3 14B (local Ollama), fallback: Qwen3 8B (local Ollama)",
+  "image_gen": null
+}

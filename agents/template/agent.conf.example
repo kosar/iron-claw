@@ -1,0 +1,25 @@
+# agent.conf — Per-agent deployment configuration
+# This file is sourced by ironclaw-core scripts.
+# Copy to agent.conf (create-agent.sh does this automatically when creating a new agent).
+
+# Agent identity (must match the directory name under agents/)
+AGENT_NAME=mybot
+
+# Network — gateway port (must be unique across all agents)
+AGENT_PORT=18790
+
+# Container naming (must be unique, convention: {name}_secure)
+AGENT_CONTAINER=mybot_secure
+
+# Optional: exec in container instead of Docker sandbox (required on Raspberry Pi).
+# Set EXEC_HOST=gateway for agents that run without a sandbox (e.g. Pi, single-container).
+# EXEC_HOST=gateway
+
+# Optional: Pi-style agent (Ollama LAN discovery, PiGlow URL, LIRC wait, ready signal).
+# Set HARDWARE_PROFILE=pi when running on a Raspberry Pi with PiGlow/PiFace/IR/RFID.
+# HARDWARE_PROFILE=pi
+
+# Resource limits
+AGENT_MEM_LIMIT=4g      # RAM limit (e.g. 2g on Pi, 12g on Mac)
+AGENT_CPUS=2.0         # CPU limit
+AGENT_SHM_SIZE=128m    # Shared memory for Chromium

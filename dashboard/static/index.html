@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ironclaw Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Ironclaw Host Dashboard</h1>
+    <p class="host-info" id="hostInfo">—</p>
+    <p class="refresh">
+      <label><input type="checkbox" id="autoRefresh" checked> Auto-refresh 30s</label>
+      <button type="button" id="refreshBtn">Refresh now</button>
+      <span id="lastUpdate"></span>
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Agents &amp; containers</h2>
+      <div id="agents" class="card">Loading…</div>
+    </section>
+    <section>
+      <h2>Host bridges</h2>
+      <div id="bridges" class="card">Loading…</div>
+    </section>
+    <section>
+      <h2>Gateway health</h2>
+      <div id="gateway" class="card">Loading…</div>
+    </section>
+    <section class="channels-section">
+      <h2>Channels (selected agent)</h2>
+      <p class="channels-hint">Telegram bot handle — the @name users see in Telegram, not the ironclaw agent name.</p>
+      <div id="channels" class="card channels-card">Loading…</div>
+    </section>
+    <section>
+      <h2>RFID (check-in)</h2>
+      <div id="rfid" class="card">Loading…</div>
+    </section>
+    <section>
+      <h2>Docker containers</h2>
+      <div id="docker" class="card">Loading…</div>
+    </section>
+    <section>
+      <h2>Recent log lines</h2>
+      <p>
+        Agent: <select id="logAgent"></select>
+        Lines: <input type="number" id="logN" value="30" min="5" max="200" style="width:4em">
+      </p>
+      <div id="logs" class="card log-box">Loading…</div>
+    </section>
+    <section>
+      <h2>Failure summary</h2>
+      <p>Agent: <select id="failAgent"></select></p>
+      <div id="failures" class="card">Loading…</div>
+    </section>
+    <section>
+      <h2>Usage &amp; cost</h2>
+      <p>Agent: <select id="usageAgent"></select></p>
+      <div id="usage" class="card">Loading…</div>
+    </section>
+    <section>
+      <h2>Agent learning quality (internal)</h2>
+      <p>Agent: <select id="learningAgent"></select></p>
+      <div id="learning" class="card">Loading…</div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

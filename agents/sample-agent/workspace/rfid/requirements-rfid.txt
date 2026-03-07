@@ -1,0 +1,3 @@
+# Install on the Pi host (venv or system). RPi.GPIO often via: sudo apt install python3-rpi.gpio
+mfrc522
+RPi.GPIO

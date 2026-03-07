@@ -1,0 +1,15 @@
+# RFID notify bridge — run every 10 seconds
+# Copy to: ~/.config/systemd/user/rfid-notify-bridge.timer
+# Enable: systemctl --user enable rfid-notify-bridge.timer && systemctl --user start rfid-notify-bridge.timer
+# Status: systemctl --user list-timers
+
+[Unit]
+Description=Run RFID notify bridge every 10s (fallback so agent gets scan events)
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=10
+AccuracySec=2
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,19 @@
+# Timer: run PiFace system display on a schedule. Each run overwrites whatever is currently
+# on the LCD with host IP + memory — so the display is "swept" back to the system view
+# even if the agent (or log bridge) just updated it. Keeps the display clean.
+# Copy to: ~/.config/systemd/user/piface-system-display.timer
+# Then: systemctl --user daemon-reload && systemctl --user enable --now piface-system-display.timer
+# (Requires piface-system-display.service to be installed and enabled.)
+
+[Unit]
+Description=Sweep PiFace to host IP + memory every 5 min
+Requires=piface-system-display.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=1min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

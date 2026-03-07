@@ -1,0 +1,22 @@
+# Learning log bridge — owner-only per-run quality feedback
+# Copy to: ~/.config/systemd/user/learning-log-bridge.service
+# Then:
+#   systemctl --user daemon-reload
+#   systemctl --user enable learning-log-bridge.service
+#   systemctl --user start learning-log-bridge.service
+# Logs:
+#   journalctl --user -u learning-log-bridge.service -f
+
+[Unit]
+Description=Internal learning bridge for OpenClaw run completion events
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kosar/ironclaw
+ExecStart=/home/kosar/ironclaw/scripts/learning-log-bridge.sh pibot
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

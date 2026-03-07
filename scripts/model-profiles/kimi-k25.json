@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "id": "kimi-k25",
+    "name": "Kimi K2.5 (Moonshot AI)",
+    "description": "Frontier MoE model. 256K context. Strong reasoning + vision.",
+    "cost_tier": "$$",
+    "requires_api_key": true,
+    "env_var": "MOONSHOT_API_KEY",
+    "env_label": "Moonshot API Key",
+    "env_hint": "Get one at https://platform.moonshot.ai"
+  },
+  "providers": {
+    "moonshot": {
+      "baseUrl": "https://api.moonshot.ai/v1",
+      "api": "openai-completions",
+      "apiKey": "${MOONSHOT_API_KEY}",
+      "models": [
+        {
+          "id": "kimi-k2.5",
+          "name": "Kimi K2.5 (primary)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "cost": { "input": 0.60, "output": 3.0, "cacheRead": 0.10, "cacheWrite": 0.60 },
+          "contextWindow": 256000,
+          "maxTokens": 65536
+        },
+        {
+          "id": "kimi-k2",
+          "name": "Kimi K2 (heartbeat)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "cost": { "input": 0.60, "output": 2.50, "cacheRead": 0.10, "cacheWrite": 0.60 },
+          "contextWindow": 256000,
+          "maxTokens": 65536
+        }
+      ]
+    }
+  },
+  "auth_profile": {
+    "key": "moonshot:default",
+    "profile": {
+      "provider": "moonshot",
+      "mode": "api_key",
+      "apiKey": "${MOONSHOT_API_KEY}",
+      "api_key": "${MOONSHOT_API_KEY}"
+    },
+    "order_key": "moonshot",
+    "order_value": ["moonshot:default"]
+  },
+  "agent_defaults": {
+    "primary": "moonshot/kimi-k2.5",
+    "fallbacks": ["ollama/qwen3:8b"],
+    "heartbeat_model": "moonshot/kimi-k2"
+  },
+  "identity_model_line": "Kimi K2.5 (Moonshot AI), fallback: Qwen3 8B (local Ollama)",
+  "image_gen": null
+}

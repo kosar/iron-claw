@@ -1,0 +1,6 @@
+# LIRC device permissions so the pibot container (UID 1000) can access the IR blaster.
+# Install (on the Pi, as root):
+#   sudo cp scripts/99-lirc-permissions.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+# Then unplug/replug the IR dongle or reboot. Verify: ls -la /dev/lirc0
+KERNEL=="lirc[0-9]*", MODE="0666"

@@ -1,0 +1,19 @@
+# USB camera capture service — user systemd (runs on Pi host)
+# Copy to: ~/.config/systemd/user/capture-service.service
+# Then: systemctl --user daemon-reload && systemctl --user enable capture-service.service && systemctl --user start capture-service.service
+# Logs: journalctl --user -u capture-service.service -f
+# Port 18792; override with: Environment=CAPTURE_PORT=18793 in [Service]
+
+[Unit]
+Description=USB camera capture service for pibot (port 18792)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kosar/ironclaw
+ExecStart=/usr/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/camera/capture_service.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

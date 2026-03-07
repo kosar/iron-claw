@@ -1,0 +1,48 @@
+services:
+  openclaw:
+    image: ironclaw:2.0
+    container_name: ${AGENT_CONTAINER}
+    restart: unless-stopped
+    mem_limit: ${AGENT_MEM_LIMIT}
+    cpus: ${AGENT_CPUS}
+    shm_size: '${AGENT_SHM_SIZE}'
+    read_only: true # Security: Immutable filesystem
+    tmpfs:
+      - /tmp:size=512m,uid=1000,gid=1000
+    user: "1000:1000" # Run as ai_sandbox (UID 1000), not root
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Bridge to Host Ollama
+    ports:
+      - "127.0.0.1:${AGENT_PORT}:${AGENT_PORT}"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - OPENCLAW_LOG_LEVEL=debug
+      - OLLAMA_API_KEY=ollama
+      - OLLAMA_HOST=${OLLAMA_HOST}
+      - SCAN_SUBNET=${SCAN_SUBNET}
+      - PIGLOW_SIGNAL_URL=http://${PIGLOW_HOST}:18793/signal
+      - PIGLOW_HOST=${PIGLOW_HOST}
+      # Secrets (OPENAI_API_KEY, OPENCLAW_GATEWAY_TOKEN, TELEGRAM_BOT_TOKEN, etc.)
+      # come from env_file: .env — add any key there and restart.
+    volumes:
+      # Mount config-runtime (copy of config); prepare with: ./scripts/compose-up.sh
+      - ./config-runtime:/home/ai_sandbox/.openclaw:rw
+      - ./workspace:/home/ai_sandbox/.openclaw/workspace:rw
+      - ./logs:/tmp/openclaw:rw
+      - ./logs:/tmp/openclaw-1000:rw
+    init: true # Tini init to reap zombie Chrome processes
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('net').createConnection(${AGENT_PORT},'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1)); setTimeout(()=>process.exit(1),5000)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

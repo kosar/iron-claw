@@ -1,0 +1,23 @@
+# Ironclaw host dashboard — web UI on port 18795 at boot
+# Install: sudo cp scripts/systemd/ironclaw-dashboard.service /etc/systemd/system/
+#         sudo systemctl daemon-reload && sudo systemctl enable ironclaw-dashboard.service
+# On default Raspberry Pi OS, set User/Group to pi and paths to /home/pi/ironclaw.
+
+[Unit]
+Description=Ironclaw host dashboard (port 18795)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kosar
+Group=kosar
+WorkingDirectory=/home/kosar/ironclaw
+ExecStart=/home/kosar/ironclaw/scripts/start-dashboard.sh
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

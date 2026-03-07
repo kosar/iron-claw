@@ -1,0 +1,21 @@
+# PiFace log bridge — drives PiFace LCD from OpenClaw app log (Telegram run start/done)
+# Copy to: ~/.config/systemd/user/piface-log-bridge.service
+# Then: systemctl --user daemon-reload && systemctl --user enable piface-log-bridge.service && systemctl --user start piface-log-bridge.service
+# Logs: journalctl --user -u piface-log-bridge.service -f
+# Requires: PiFace bridge running (piface-bridge.service on 18794), jq, pibot logs at agents/pibot/logs/
+# For user service at boot without login: loginctl enable-linger $USER
+
+[Unit]
+Description=PiFace log bridge for pibot (THINKING/DONE on Telegram runs)
+After=network-online.target piface-bridge.service
+Wants=piface-bridge.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kosar/ironclaw
+ExecStart=/home/kosar/ironclaw/scripts/piface-log-bridge.sh pibot
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

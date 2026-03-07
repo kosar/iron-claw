@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Ironclaw Dashboard
+Comment=Open Ironclaw host dashboard in browser on login
+# Copy this file to ~/.config/autostart/ironclaw-dashboard.desktop
+# Then edit Exec to match your repo path and user (e.g. /home/pi/ironclaw).
+Exec=/home/kosar/ironclaw/dashboard/open-dashboard-browser.sh
+X-GNOME-Autostart-enabled=true
+NoDisplay=true

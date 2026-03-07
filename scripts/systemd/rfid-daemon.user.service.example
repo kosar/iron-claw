@@ -1,0 +1,20 @@
+# RC522 RFID daemon — user systemd service (runs on Pi host, not in Docker)
+# Copy to: ~/.config/systemd/user/rfid-daemon.service
+# Then: systemctl --user daemon-reload && systemctl --user enable rfid-daemon.service && systemctl --user start rfid-daemon.service
+# Logs: journalctl --user -u rfid-daemon.service -f
+# Adjust WorkingDirectory and EnvironmentFile if your repo or user differ.
+
+[Unit]
+Description=RC522 RFID daemon for pibot
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kosar/ironclaw
+EnvironmentFile=/home/kosar/ironclaw/agents/pibot/.env
+ExecStart=/home/kosar/ironclaw/agents/pibot/workspace/rfid/.venv/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/rfid/rfid_daemon.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

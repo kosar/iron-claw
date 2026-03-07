@@ -1,0 +1,21 @@
+# Audio bridge service — user systemd (runs on Pi host)
+# Easiest: run ./scripts/install-audio-bridge-at-boot.sh from repo root (installs faster-whisper if needed, installs this unit, enables and starts).
+# Requires: faster-whisper installed (pip install --user faster-whisper). No venv.
+# For start at boot without login: loginctl enable-linger $USER
+# Logs: journalctl --user -u audio-bridge.service -f
+# Mic: set AUDIO_CAPTURE_DEVICE from arecord -L (e.g. plughw:CARD=Camera,DEV=0).
+
+[Unit]
+Description=Audio bridge for pibot (mic + playback + transcribe, port 18796)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kosar/ironclaw
+Environment=AUDIO_CAPTURE_DEVICE=plughw:CARD=Camera,DEV=0
+ExecStart=/usr/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/audio/audio_bridge_service.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,101 @@
+:root {
+  --bg: #0f1419;
+  --card: #1a2332;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --ok: #3fb950;
+  --warn: #d29922;
+  --err: #f85149;
+  --border: #30363d;
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 1rem;
+  line-height: 1.5;
+}
+header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+h1 { font-size: 1.5rem; margin: 0 0 0.25rem 0; }
+.host-info { color: var(--muted); font-size: 0.9rem; margin: 0; }
+.refresh { margin: 0.5rem 0 0 0; font-size: 0.9rem; }
+.refresh label { margin-right: 1rem; }
+#refreshBtn { margin-right: 0.5rem; }
+#lastUpdate { color: var(--muted); font-size: 0.85rem; }
+
+main { max-width: 960px; }
+section { margin-bottom: 1.5rem; }
+section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--muted);
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+.card.loading { color: var(--muted); }
+.card.error { color: var(--err); }
+.log-box { max-height: 280px; overflow-y: auto; font-family: ui-monospace, monospace; font-size: 0.8rem; white-space: pre-wrap; word-break: break-all; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; }
+.status-ok { color: var(--ok); }
+.status-warn { color: var(--warn); }
+.status-err { color: var(--err); }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.bridge-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.bridge-name { font-weight: 600; min-width: 6rem; }
+.bridge-detail { color: var(--muted); }
+
+select, input { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 0.25rem 0.5rem; }
+
+.channels-section { margin-top: 1rem; }
+.channels-hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.5rem 0; }
+.channels-card { padding: 1rem 1.25rem; }
+.telegram-handle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+.telegram-handle .at { color: var(--muted); font-weight: 600; }
+.channels-label { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.35rem; }
+
+.learning-card { font-size: 0.85rem; }
+.learning-summary { margin-bottom: 0.75rem; }
+.learning-summary > div { margin-bottom: 0.2rem; }
+.learning-subhead {
+  margin-top: 0.75rem;
+  margin-bottom: 0.35rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.learning-muted { color: var(--muted); }
+.learning-signal {
+  margin-top: 0.35rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #152032;
+}
+.learning-history-box {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}

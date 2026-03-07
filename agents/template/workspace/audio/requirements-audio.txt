@@ -1,0 +1,4 @@
+# Host-side deps for audio bridge (transcription). Install on the Pi host:
+#   pip install -r agents/pibot/workspace/audio/requirements-audio.txt
+# Local Whisper only — no paid API. Ollama does not support audio input.
+faster-whisper>=1.0.0

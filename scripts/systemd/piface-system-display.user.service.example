@@ -1,0 +1,18 @@
+# PiFace system display — show host IP + memory on the LCD (runs on the Pi host).
+# Each run overwrites whatever is on the display. Used with the timer so the display
+# is periodically swept back to system info (IP, Mem) even after agent updates.
+# Copy to: ~/.config/systemd/user/piface-system-display.service
+# Enable timer: systemctl --user enable --now piface-system-display.timer
+
+[Unit]
+Description=PiFace system display (host IP + memory)
+After=network-online.target piface-bridge.service
+Wants=piface-bridge.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/kosar/ironclaw
+ExecStart=/home/kosar/ironclaw/scripts/piface-system-display.sh
+
+[Install]
+WantedBy=default.target

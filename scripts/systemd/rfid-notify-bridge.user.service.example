@@ -1,0 +1,13 @@
+# RFID notify bridge — runs the poll script once (invoked by the timer)
+# Copy to: ~/.config/systemd/user/rfid-notify-bridge.service
+# Then: systemctl --user daemon-reload && systemctl --user enable rfid-notify-bridge.timer && systemctl --user start rfid-notify-bridge.timer
+# Timer runs every 10s so the agent is notified even if the daemon's immediate gateway call failed.
+
+[Unit]
+Description=RFID notify bridge (one-shot, called by timer)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/kosar/ironclaw
+EnvironmentFile=/home/kosar/ironclaw/agents/pibot/.env
+ExecStart=/usr/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/rfid/rfid_notify_bridge.py

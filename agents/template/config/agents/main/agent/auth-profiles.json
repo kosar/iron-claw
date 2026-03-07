@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "ollama:default": {
+      "provider": "ollama",
+      "mode": "api_key",
+      "apiKey": "ollama",
+      "api_key": "ollama"
+    },
+    "openai:default": {
+      "provider": "openai",
+      "mode": "api_key",
+      "apiKey": "${OPENAI_API_KEY}",
+      "api_key": "${OPENAI_API_KEY}"
+    }
+  },
+  "order": {
+    "ollama": ["ollama:default"],
+    "openai": ["openai:default"]
+  }
+}
