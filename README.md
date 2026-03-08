@@ -22,6 +22,15 @@ If you are new, use this order:
 - **Docker** and **Docker Compose**
 - **[jq](https://jqlang.github.io/jq/)**: `apt install jq` (Debian/Ubuntu), `brew install jq` (macOS)
 
+## HEADS UP: Add API cost guardrails (do this before first run)
+
+This setup is powerful, so put simple guardrails in place first so you are not surprised with the increased API usage that this will likely drive. You can also run the AI ("LLM") models locally if you have enough horsepower, or set sensible limits to help you get familiar with the amount of API usage your agents are likely to consume. 
+
+- For **every metered key** you add (OpenAI, Moonshot, Anthropic, or others), set a **hard spend cap** and **alert thresholds** in that provider dashboard before using the key here.
+- Start conservative: keep per-response token limits and concurrency low, then raise them after you see stable usage.
+- Check usage often with `./scripts/usage-summary.sh <agent>`.
+- Keep an emergency stop handy: `docker compose -p <agent> down`.
+
 ## Quick start
 
 ```bash
