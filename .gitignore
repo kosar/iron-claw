@@ -54,6 +54,7 @@ agents/*/workspace/skills/*/logs/
 agents/*/workspace/skills/send-email/.env
 
 # Ollama host scan cache (runtime artifact, changes on every scan)
+agents/*/workspace/ollama-best-known.json
 agents/*/workspace/skills/image-gen/ollama-hosts.json
 # Ollama last-used host/model persistence (runtime)
 agents/*/workspace/skills/image-gen/ollama-last.json

@@ -2,6 +2,8 @@
 
 OpenClaw needs a model that **supports tool/function calling** (for exec, browser, etc.). “Reasoning” (chain-of-thought) and “tools” are separate: e.g. DeepSeek-R1 is reasoning but does **not** support tools in Ollama, so it cannot be used as the main agent model here.
 
+**Ollama on LAN:** For automatic discovery, bootstrap (primary/fallbacks from discovery), and a persistent best-known list in the agent workspace, see [OLLAMA-LAN-BOOTSTRAP.md](OLLAMA-LAN-BOOTSTRAP.md).
+
 ---
 
 ## Is qwen2.5-coder good for non-coding?

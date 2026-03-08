@@ -167,6 +167,65 @@ if [[ -z "$OLLAMA_HOST" ]]; then
           cp "$OLLAMA_TMP" "$catalog_dir/ollama-hosts.json" 2>/dev/null || true
         fi
       done
+
+      # Build ollama-best-known.json and optionally patch config-runtime primary/fallbacks (Ollama-first mode)
+      if command -v jq >/dev/null 2>&1 && [[ -d "$AGENT_WORKSPACE" ]]; then
+        _now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        # Ollama-first: no usable cloud API key or explicit flag
+        _api_key=""
+        [[ -f "$AGENT_ENV" ]] && _api_key=$(grep -E '^OPENAI_API_KEY=' "$AGENT_ENV" 2>/dev/null | cut -d= -f2- | tr -d '"'\''\r' | xargs)
+        [[ -z "${OPENAI_API_KEY:-}" ]] && OPENAI_API_KEY="$_api_key"
+        _ollama_first=false
+        [[ -z "${OPENAI_API_KEY:-}" || "${OPENAI_API_KEY:-}" == "not-set" || "${IRONCLAW_OLLAMA_FIRST:-0}" == "1" ]] && _ollama_first=true
+
+        # Build best-known from catalog: hosts with last_probed_at, last_success_at (null at bootstrap), text/vision/image models
+        _best_known=$(jq -c --arg now "$_now" --arg chosen "$OLLAMA_HOST" '
+          [.hosts[] |
+            {
+              host: .host,
+              port: .port,
+              last_probed_at: $now,
+              last_success_at: null,
+              text_models: [.text_models[]? | "ollama/" + .],
+              vision_models: [.text_models[]? | select(test("vision"; "i")) | "ollama/" + .],
+              image_models: [.image_models[]? | "ollama/" + .]
+            }
+          ] as $hosts
+          | ((.hosts[] | select(.host == $chosen) | .text_models) // []) as $raw_text
+          | ($raw_text | map(select(test("^(qwen3|qwen2.5-coder|llama3.2)"; "i") and (test("deepseek-r1"; "i") | not)))) as $tool_raw
+          | {
+              updated_at: $now,
+              hosts: $hosts,
+              source_host: $chosen,
+              recommended_primary: (if ($tool_raw | length) > 0 then "ollama/" + $tool_raw[0] else null end),
+              recommended_fallbacks: (if ($tool_raw | length) > 1 then [$tool_raw[1:][] | "ollama/" + .] else [] end)
+            }
+        ' "$OLLAMA_TMP" 2>/dev/null)
+
+        if [[ -n "$_best_known" ]]; then
+          echo "$_best_known" > "$AGENT_WORKSPACE/ollama-best-known.json"
+          echo "[$AGENT_NAME] Wrote workspace/ollama-best-known.json (bootstrap)" >&2
+        fi
+
+        # When Ollama-first and we have a tool-capable primary, patch config-runtime
+        if [[ "$_ollama_first" == true ]] && [[ -f "$CONFIG_RUNTIME/openclaw.json" ]]; then
+          _primary=$(echo "$_best_known" | jq -r '.recommended_primary // empty')
+          if [[ -n "$_primary" ]]; then
+            _fallbacks=$(echo "$_best_known" | jq -c '.recommended_fallbacks // []')
+            _tmp_json=$(mktemp)
+            if jq --arg p "$_primary" --argjson f "$_fallbacks" '
+              .agents.defaults.model.primary = $p
+              | .agents.defaults.model.fallbacks = $f
+              | .agents.defaults.heartbeat.model = $p
+            ' "$CONFIG_RUNTIME/openclaw.json" > "$_tmp_json" 2>/dev/null; then
+              mv "$_tmp_json" "$CONFIG_RUNTIME/openclaw.json"
+              echo "[$AGENT_NAME] Ollama-first: patched primary=$_primary, fallbacks from discovery, heartbeat=local" >&2
+            else
+              rm -f "$_tmp_json"
+            fi
+          fi
+        fi
+      fi
     fi
   fi
   rm -f "$OLLAMA_TMP"

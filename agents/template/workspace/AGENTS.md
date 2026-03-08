@@ -45,6 +45,12 @@ When presenting results, suggest next steps as offers at the end ("I can check s
 
 ---
 
+## Local inference (Ollama)
+
+For local inference, prefer the hosts and models in `workspace/ollama-best-known.json` when present. That file is kept up to date by the system (bootstrap at compose-up, refresh every 2h); use its `recommended_primary` and `recommended_fallbacks` when suggesting or using LAN Ollama models.
+
+---
+
 ## Web content retrieval — choosing the right tool
 
 You have two tools for getting web content. Choose the right one:

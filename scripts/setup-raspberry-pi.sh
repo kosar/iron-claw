@@ -547,6 +547,29 @@ STARTScript
   log_ok "Enabled $service_name (agent will start after reboot)"
 }
 
+# --- Step 7b: Optional cron to refresh Ollama best-known list (same cadence as heartbeat) ---
+do_ollama_refresh_cron() {
+  if [[ ! -x "$IRONCLAW_ROOT/scripts/refresh-ollama-best-known.sh" ]]; then
+    return 0
+  fi
+  local cron_line="0 */2 * * * cd $IRONCLAW_ROOT && $IRONCLAW_ROOT/scripts/refresh-ollama-best-known.sh $AGENT_NAME"
+  local crontab_user=""
+  [[ $(id -u) -eq 0 ]] && [[ -n "$CURRENT_USER" ]] && crontab_user="-u $CURRENT_USER"
+  local current_cron
+  current_cron="$(crontab $crontab_user -l 2>/dev/null)" || true
+  if echo "$current_cron" | grep -q "refresh-ollama-best-known.sh"; then
+    log_ok "Cron for Ollama best-known refresh already present"
+    return 0
+  fi
+  log_step "Adding cron to refresh Ollama best-known list every 2h (same as heartbeat)..."
+  (echo "$current_cron"; echo "$cron_line") | crontab $crontab_user - 2>/dev/null || true
+  if crontab $crontab_user -l 2>/dev/null | grep -q "refresh-ollama-best-known.sh"; then
+    log_ok "Cron installed: Ollama best-known list will refresh every 2h"
+  else
+    log_warn "Could not install cron (run as the Pi user or add manually): $cron_line"
+  fi
+}
+
 # --- Step 8: Verify and summary ---
 do_verify_and_summary() {
   local svc_name="ironclaw-$AGENT_NAME.service"
@@ -617,10 +640,12 @@ do_verify_and_summary() {
   echo -e "${YELLOW}What you should do next:${RESET}"
   echo "  1. Set real secrets in $IRONCLAW_ROOT/agents/$AGENT_NAME/.env"
   echo "     (OPENCLAW_OWNER_DISPLAY_SECRET and, for cloud models, OPENAI_API_KEY)"
-  echo "  2. Before enabling Telegram: in config/openclaw.json set allowFrom/groupAllowFrom to your numeric user ID(s) (not the placeholder 0). Keep dmPolicy/groupPolicy as allowlist."
-  echo "  3. Log out and log back in (or reboot) so the docker group takes effect."
-  echo "  4. After reboot, check: sudo systemctl status $svc_name"
-  echo "  5. Test gateway: $IRONCLAW_ROOT/scripts/test-gateway-http.sh $AGENT_NAME"
+  echo "  2. To use local models only: leave OPENAI_API_KEY unset (or not-set); the agent will use Ollama on the LAN if found."
+  echo "     Best-known Ollama hosts and models are in workspace/ollama-best-known.json and refreshed every 2h (same as heartbeat) when the cron is installed."
+  echo "  3. Before enabling Telegram: in config/openclaw.json set allowFrom/groupAllowFrom to your numeric user ID(s) (not the placeholder 0). Keep dmPolicy/groupPolicy as allowlist."
+  echo "  4. Log out and log back in (or reboot) so the docker group takes effect."
+  echo "  5. After reboot, check: sudo systemctl status $svc_name"
+  echo "  6. Test gateway: $IRONCLAW_ROOT/scripts/test-gateway-http.sh $AGENT_NAME"
   echo ""
   echo -e "${GREEN}Setup complete. You can be proud of this Pi.${RESET}"
   echo ""
@@ -656,6 +681,7 @@ main() {
   do_configure_agent
   do_compose_up
   do_systemd
+  do_ollama_refresh_cron
   do_verify_and_summary
 }
 

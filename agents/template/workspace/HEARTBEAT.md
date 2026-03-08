@@ -52,6 +52,7 @@ Read `workspace/MEMORY.md`. Check the `last_curated` date at the bottom of the f
 
 ## Guidelines
 
+- **Local models:** If `workspace/ollama-best-known.json` exists, prefer its `recommended_primary` and `recommended_fallbacks` for local inference. When suggesting model switches or reporting capabilities, use this list as the source of best-known LAN options.
 - **Be conservative**: Skip curation if daily notes are sparse or trivial (e.g., only heartbeat entries).
 - **Keep MEMORY.md concise**: Each entry should be 1-2 lines. Group by topic, not by date.
 - **Don't duplicate AGENTS.md content**: MEMORY.md is for learned knowledge, not static instructions.
