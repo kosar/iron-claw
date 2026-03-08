@@ -30,30 +30,30 @@ Create the message body as a **file** in the **workspace** so the exec can read 
 
 - **Plain text:** `write` to e.g. `workspace/email_body.txt` or `workspace/memory/tmp_email.txt` with the body content.
 - **HTML:** Same, then use `--html` in Step 2.
-- Use the **full path** in Step 2: `/home/ai_sandbox/.openclaw/workspace/email_body.txt` (or whatever path you used).
+- Use the **full path** in Step 2: `/home/openclaw/.openclaw/workspace/email_body.txt` (or whatever path you used).
 
 ### STEP 2 — Send via script
 
 **Plain text only (no attachments):**
 
 ```bash
-python3 /home/ai_sandbox/.openclaw/workspace/skills/send-email/scripts/send_email.py "<to@email.com>" "<Subject>" "<path-to-body-file>"
+python3 /home/openclaw/.openclaw/workspace/skills/send-email/scripts/send_email.py "<to@email.com>" "<Subject>" "<path-to-body-file>"
 ```
 
 **HTML body (no attachments):**
 
 ```bash
-python3 /home/ai_sandbox/.openclaw/workspace/skills/send-email/scripts/send_email.py "<to@email.com>" "<Subject>" "<path-to-body-file>" --html
+python3 /home/openclaw/.openclaw/workspace/skills/send-email/scripts/send_email.py "<to@email.com>" "<Subject>" "<path-to-body-file>" --html
 ```
 
 **With attachments:**
 
 ```bash
-python3 /home/ai_sandbox/.openclaw/workspace/skills/send-email/scripts/send_email.py "<to@email.com>" "<Subject>" "<path-to-body-file>" [--html] --attach <file1> [file2 ...]
+python3 /home/openclaw/.openclaw/workspace/skills/send-email/scripts/send_email.py "<to@email.com>" "<Subject>" "<path-to-body-file>" [--html] --attach <file1> [file2 ...]
 ```
 
 - Replace `<to@email.com>`, `<Subject>`, and `<path-to-body-file>` with real values.
-- **Body file path:** Must be a path the exec can read — use a file you created with `write` **in the workspace** (e.g. `/home/ai_sandbox/.openclaw/workspace/email_body.txt`). Do not use `/tmp/...` as the sandbox may not see it. Use `--html` only if the body file is HTML.
+- **Body file path:** Must be a path the exec can read — use a file you created with `write` **in the workspace** (e.g. `/home/openclaw/.openclaw/workspace/email_body.txt`). Do not use `/tmp/...` as the sandbox may not see it. Use `--html` only if the body file is HTML.
 - Attachments are optional; list one or more file paths after `--attach`.
 
 ### STEP 3 — Reply

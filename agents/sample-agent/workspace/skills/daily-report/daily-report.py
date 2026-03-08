@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from collections import Counter, defaultdict
 from pathlib import Path
 
-IRONCLAW_ROOT = os.environ.get('IRONCLAW_ROOT', '/home/ai_sandbox/.openclaw')
+IRONCLAW_ROOT = os.environ.get('IRONCLAW_ROOT', '/home/openclaw/.openclaw')
 
 def list_agents():
     """List all agent directories."""
@@ -145,7 +145,7 @@ def parse_session_files(sessions_dir, date_str):
 
 def get_ai_summary(agent_paths, report_text):
     """Get a smart summary of the report using the configured report_model."""
-    # Config lives at the OpenClaw root (container: /home/ai_sandbox/.openclaw/openclaw.json)
+    # Config lives at the OpenClaw root (container: /home/openclaw/.openclaw/openclaw.json)
     # Try agent-specific config first, fall back to root config
     config_file = agent_paths['config'] / 'openclaw.json'
     if not config_file.exists():

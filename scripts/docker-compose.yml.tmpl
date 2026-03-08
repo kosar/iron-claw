@@ -9,7 +9,7 @@ services:
     read_only: true # Security: Immutable filesystem
     tmpfs:
       - /tmp:size=512m,uid=1000,gid=1000
-    user: "1000:1000" # Run as ai_sandbox (UID 1000), not root
+    user: "1000:1000" # Run as openclaw (UID 1000), not root
     extra_hosts:
       - "host.docker.internal:host-gateway" # Bridge to Host Ollama
     ports:
@@ -28,8 +28,8 @@ services:
       # come from env_file: .env — add any key there and restart.
     volumes:
       # Mount config-runtime (copy of config); prepare with: ./scripts/compose-up.sh
-      - ./config-runtime:/home/ai_sandbox/.openclaw:rw
-      - ./workspace:/home/ai_sandbox/.openclaw/workspace:rw
+      - ./config-runtime:/home/openclaw/.openclaw:rw
+      - ./workspace:/home/openclaw/.openclaw/workspace:rw
       - ./logs:/tmp/openclaw:rw
       - ./logs:/tmp/openclaw-1000:rw
     init: true # Tini init to reap zombie Chrome processes

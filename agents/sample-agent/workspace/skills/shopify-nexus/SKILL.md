@@ -27,7 +27,7 @@ If you skip Step 7, future queries to the same store will be slower and dumber. 
 **Logging**: You MUST log every significant action using the logging script. This is not optional. The log command pattern is:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh <event> key1=value1 key2=value2 ...
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh <event> key1=value1 key2=value2 ...
 ```
 
 Logs are written to `/tmp/openclaw/nexus-search.log` (JSON-per-line, viewable from host at `logs/nexus-search.log`).
@@ -43,7 +43,7 @@ Parse the user's request to identify:
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh search_start domain={shop_domain} query="{query}" mode={mode}
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh search_start domain={shop_domain} query="{query}" mode={mode}
 ```
 
 ## Step 2: SSRF Validation
@@ -59,12 +59,12 @@ Before making any request, validate `shop_domain`. **REJECT** the request if the
 
 **Log the result:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_validation domain={shop_domain} status=ok
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_validation domain={shop_domain} status=ok
 ```
 
 If validation fails:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_validation domain={shop_domain} status=rejected reason="failed SSRF check: {specific reason}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_validation domain={shop_domain} status=rejected reason="failed SSRF check: {specific reason}"
 ```
 Then respond: "I can't search that domain for security reasons. Please provide a valid public Shopify store domain (e.g., allbirds.com)."
 
@@ -73,7 +73,7 @@ Then respond: "I can't search that domain for security reasons. Please provide a
 Before constructing your query, read the knowledge file for prior experience with stores and query patterns:
 
 ```
-read: /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/nexus-knowledge.md
+read: /home/openclaw/.openclaw/workspace/skills/shopify-nexus/nexus-knowledge.md
 ```
 
 If the file doesn't exist yet, this is the first-ever search — skip to Step 4 and treat it as a discovery run.
@@ -87,7 +87,7 @@ If the file exists, scan it for entries relevant to this search:
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh memory_recall domain={shop_domain} memory_hits={number of matching lines found} note="{brief summary of what you recalled, or 'first encounter with this store'}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh memory_recall domain={shop_domain} memory_hits={number of matching lines found} note="{brief summary of what you recalled, or 'first encounter with this store'}"
 ```
 
 ## Step 4: Stage 1 — Nexus Search (MCP + Storefront)
@@ -101,7 +101,7 @@ If you have NO memory entries for this store's MCP capabilities, start with a di
 #### Attempt 1: Direct domain
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} --discover
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} --discover
 ```
 
 **If this succeeds**, the response contains a JSON-RPC result with a `tools` array. Each tool has a `name`, `description`, and `inputSchema`. Common tools you'll see:
@@ -112,7 +112,7 @@ exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/sho
 
 Log the discovery:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_discovery domain={shop_domain} status=ok mcp_tools="{comma-separated tool names from the tools array}" payload_bytes={response size in bytes} note="{brief summary of capabilities}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_discovery domain={shop_domain} status=ok mcp_tools="{comma-separated tool names from the tools array}" payload_bytes={response size in bytes} note="{brief summary of capabilities}"
 ```
 
 **If this fails** (curl error, HTTP error, JSON-RPC error), DO NOT give up. Enter the self-healing resolution chain:
@@ -124,24 +124,24 @@ Try each fix in order. Stop as soon as one works.
 **Fix 1 — Try `.myshopify.com` variant:**
 Many stores have a vanity domain but the MCP endpoint lives on their `.myshopify.com` subdomain. Extract the brand name and try:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {brand-name}.myshopify.com --discover
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {brand-name}.myshopify.com --discover
 ```
 For example: `allbirds.com` → `allbirds.myshopify.com`, `gymshark.com` → `gymshark.myshopify.com`.
 
 Log the attempt:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_from={original} correction_to={attempted} correction_method=myshopify reason="{what happened with original domain}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_from={original} correction_to={attempted} correction_method=myshopify reason="{what happened with original domain}"
 ```
 
 **Fix 2 — Try with/without `www.` prefix:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh www.{shop_domain} --discover
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh www.{shop_domain} --discover
 ```
 Or if the user gave `www.example.com`, try without it.
 
 Log it:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_from={original} correction_to={attempted} correction_method=www
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_from={original} correction_to={attempted} correction_method=www
 ```
 
 **Fix 3 — Verify it's actually a Shopify store:**
@@ -155,7 +155,7 @@ web_fetch https://{shop_domain}/products.json?limit=1
 
 Log it:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_method=shopify_verify reason="{what products.json returned}" note="{is it Shopify? is MCP available?}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_method=shopify_verify reason="{what products.json returned}" note="{is it Shopify? is MCP available?}"
 ```
 
 **Fix 4 — Common misspellings:**
@@ -166,13 +166,13 @@ If the domain looks like a plausible misspelling (e.g., `allbird.com` without th
 
 Log it:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_from={original} correction_to={attempted} correction_method=spelling reason="suspected typo"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh domain_correction domain={shop_domain} status={ok|error} correction_from={original} correction_to={attempted} correction_method=spelling reason="suspected typo"
 ```
 
 **If ALL fixes fail — fall back silently. THIS IS MANDATORY, NOT OPTIONAL:**
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_discovery domain={shop_domain} status=error reason="exhausted all resolution attempts" note="{summary: which variants tried, what each returned}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_discovery domain={shop_domain} status=error reason="exhausted all resolution attempts" note="{summary: which variants tried, what each returned}"
 ```
 
 You MUST then:
@@ -221,17 +221,17 @@ Based on memory (Step 3) and discovery (Step 4a), construct the best query and c
 
 For catalog searches, call `search_shop_catalog` with the user's query:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} search_shop_catalog query="{user's search terms}" context="browsing"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} search_shop_catalog query="{user's search terms}" context="browsing"
 ```
 
 For policy/FAQ queries (`mode: policy`), call `search_shop_policies_and_faqs`:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} search_shop_policies_and_faqs query="{user's policy question}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} search_shop_policies_and_faqs query="{user's policy question}"
 ```
 
 For a specific product (when you have a product ID from a prior search):
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} get_product_details product_id="{gid://shopify/Product/...}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} get_product_details product_id="{gid://shopify/Product/...}"
 ```
 
 **Note:** The script takes key=value pairs (not raw JSON). Each parameter is a separate argument. Values with spaces must be quoted.
@@ -247,7 +247,7 @@ Use specific product types, collection handles, or vendor names you've learned f
 
 **Log the search:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_search domain={shop_domain} query="{actual query sent}" query_level={1|2|3} endpoint=mcp status={ok|error|empty} products={count} payload_bytes={response size} note="{brief: what came back}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_search domain={shop_domain} query="{actual query sent}" query_level={1|2|3} endpoint=mcp status={ok|error|empty} products={count} payload_bytes={response size} note="{brief: what came back}"
 ```
 
 ### 4c: Empty Results — Retry Before Fallback
@@ -260,12 +260,12 @@ If the MCP tool call returns zero products (empty `content` array or no product 
 
 Call the MCP script again with the adjusted query:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} search_shop_catalog query="{adjusted terms}" context="{reason for adjustment}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/shopify-mcp.sh {shop_domain} search_shop_catalog query="{adjusted terms}" context="{reason for adjustment}"
 ```
 
 Log the retry:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_search domain={shop_domain} query="{adjusted query}" query_level={level} endpoint=mcp status={ok|error|empty} products={count} payload_bytes={response size} note="retry: broadened/narrowed from original query"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh mcp_search domain={shop_domain} query="{adjusted query}" query_level={level} endpoint=mcp status={ok|error|empty} products={count} payload_bytes={response size} note="retry: broadened/narrowed from original query"
 ```
 
 ### 4d: Fallback — Legacy Products API
@@ -273,7 +273,7 @@ exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nex
 If MCP returns an error or remains empty after retry, fall back:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh search_fallback domain={shop_domain} fallback_reason="{MCP returned 404|MCP empty after retry|MCP timeout|etc}" endpoint=products_json
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh search_fallback domain={shop_domain} fallback_reason="{MCP returned 404|MCP empty after retry|MCP timeout|etc}" endpoint=products_json
 ```
 
 ```
@@ -288,12 +288,12 @@ Additional parameters you can try:
 
 **Log the fallback result:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh products_json_search domain={shop_domain} query="{query}" status={ok|error|empty} products={count} payload_bytes={response size} note="{what came back}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh products_json_search domain={shop_domain} query="{query}" status={ok|error|empty} products={count} payload_bytes={response size} note="{what came back}"
 ```
 
 If both MCP and products.json fail:
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh error domain={shop_domain} reason="both MCP and products.json failed" note="{details of both failures}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh error domain={shop_domain} reason="both MCP and products.json failed" note="{details of both failures}"
 ```
 Record `[store:{shop_domain}] no MCP` in `nexus-knowledge.md`, then **fall back to web_fetch or browser** to answer the user's question directly. Fetch the store's website, find what the user asked about, and present it. Never tell the user the pipeline failed — just deliver the answer.
 
@@ -321,12 +321,12 @@ Construct a JSON payload for the Chatsi Product Genius API. Use the top 3 produc
 Base64-encode the JSON payload and call the Chatsi Genius script:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/chatsi-genius.sh '<base64_encoded_payload>'
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/chatsi-genius.sh '<base64_encoded_payload>'
 ```
 
 **Log the call:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh genius_call domain={shop_domain} genius_status={ok|offline} request_bytes={payload size} payload_bytes={response size} reason="{if offline, why}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh genius_call domain={shop_domain} genius_status={ok|offline} request_bytes={payload size} payload_bytes={response size} reason="{if offline, why}"
 ```
 
 Parse the JSON output. The script returns one of:
@@ -367,7 +367,7 @@ Score the search on these dimensions:
 
 **Log the evaluation:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh results_summary domain={shop_domain} query="{original query}" endpoint={mcp|products_json} products={count} relevance={high|medium|low} detail={rich|partial|sparse} payload_bytes={total response bytes across all fetches} query_level={1|2|3} genius_status={ok|offline} note="{one-line assessment: what worked, what didn't, what to try next time}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh results_summary domain={shop_domain} query="{original query}" endpoint={mcp|products_json} products={count} relevance={high|medium|low} detail={rich|partial|sparse} payload_bytes={total response bytes across all fetches} query_level={1|2|3} genius_status={ok|offline} note="{one-line assessment: what worked, what didn't, what to try next time}"
 ```
 
 ### 7b: Identify Learnings
@@ -382,7 +382,7 @@ Ask yourself:
 
 ### 7c: Store Observations in Knowledge File
 
-Write your learnings to the knowledge file at `/home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/nexus-knowledge.md`. This file persists across sessions and restarts — it is your long-term memory for store intelligence.
+Write your learnings to the knowledge file at `/home/openclaw/.openclaw/workspace/skills/shopify-nexus/nexus-knowledge.md`. This file persists across sessions and restarts — it is your long-term memory for store intelligence.
 
 **How to write:**
 
@@ -436,7 +436,7 @@ Examples:
 
 **After writing, log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh memory_store domain={shop_domain} note="{what was stored or updated}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh memory_store domain={shop_domain} note="{what was stored or updated}"
 ```
 
 ### 7d: What NOT to Store
@@ -479,7 +479,7 @@ Do NOT say "AI analysis is temporarily unavailable" or suggest trying again late
 For each of the top 1–3 products that have an image URL in the MCP response data, run:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/scripts/send-photo.sh "{image_url}" "<b>{product_name}</b> — {price}"
+exec: bash /home/openclaw/.openclaw/workspace/scripts/send-photo.sh "{image_url}" "<b>{product_name}</b> — {price}"
 ```
 
 - Send images AFTER your text reply, not before
@@ -490,7 +490,7 @@ exec: bash /home/ai_sandbox/.openclaw/workspace/scripts/send-photo.sh "{image_ur
 
 **Log completion:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh search_complete domain={shop_domain} query="{original query}" products={total products in final response} endpoint={mcp|products_json} genius_status={ok|offline} query_level={1|2|3} relevance={high|medium|low}
+exec: bash /home/openclaw/.openclaw/workspace/skills/shopify-nexus/scripts/nexus-log.sh search_complete domain={shop_domain} query="{original query}" products={total products in final response} endpoint={mcp|products_json} genius_status={ok|offline} query_level={1|2|3} relevance={high|medium|low}
 ```
 
 ## Important Notes
@@ -501,4 +501,4 @@ exec: bash /home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/scripts/nex
 - The Chatsi Genius API is optional — the skill is fully functional with just MCP data and your own analysis.
 - Each query is a learning opportunity. The memory step (Step 7) is not optional — always evaluate and store observations after a search, even if the search was straightforward.
 - **Logging is not optional.** Every step must produce a log entry. This is how we monitor search quality, identify failing stores, and track the skill's improvement over time.
-- The knowledge file at `/home/ai_sandbox/.openclaw/workspace/skills/shopify-nexus/nexus-knowledge.md` is your persistent brain. It survives restarts, syncs, and session boundaries. Every `[store:...]` and `[pattern:...]` entry you write makes the next query to that store faster and more accurate. Read it at the start of every search, write to it at the end of every search. This is how you get smarter over time.
+- The knowledge file at `/home/openclaw/.openclaw/workspace/skills/shopify-nexus/nexus-knowledge.md` is your persistent brain. It survives restarts, syncs, and session boundaries. Every `[store:...]` and `[pattern:...]` entry you write makes the next query to that store faster and more accurate. Read it at the start of every search, write to it at the end of every search. This is how you get smarter over time.

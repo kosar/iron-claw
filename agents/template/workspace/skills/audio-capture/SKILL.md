@@ -29,7 +29,7 @@ The microphone (and playback) are on the **Pi host**. The audio bridge service l
 Run from the workspace (container):
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/audio-capture/scripts/record.sh [seconds]
+exec: bash /home/openclaw/.openclaw/workspace/skills/audio-capture/scripts/record.sh [seconds]
 ```
 
 Default 10 seconds; max 60. The bridge writes to `workspace/audio/last_record.wav` (overwritten each time). On success the script prints `OK: workspace/audio/last_record.wav`. On failure it prints `RECORD_FAILED: <reason>` and exits non-zero.
@@ -39,7 +39,7 @@ Default 10 seconds; max 60. The bridge writes to `workspace/audio/last_record.wa
 Path is relative to workspace (e.g. `rfid/scan_sound.wav`, `audio/prompt_announce.wav`):
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/audio-capture/scripts/play.sh <path>
+exec: bash /home/openclaw/.openclaw/workspace/skills/audio-capture/scripts/play.sh <path>
 ```
 
 Example: `play.sh rfid/scan_sound.wav` plays the two-tone latch.

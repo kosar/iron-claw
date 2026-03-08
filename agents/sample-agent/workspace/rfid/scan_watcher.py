@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # When run in container, workspace/rfid is mounted; when run on host for testing, use script dir
-if os.path.exists("/home/ai_sandbox/.openclaw/workspace/rfid/last_scan.json"):
-    RFID_DIR = "/home/ai_sandbox/.openclaw/workspace/rfid"
+if os.path.exists("/home/openclaw/.openclaw/workspace/rfid/last_scan.json"):
+    RFID_DIR = "/home/openclaw/.openclaw/workspace/rfid"
 else:
     RFID_DIR = SCRIPT_DIR
 

@@ -28,7 +28,7 @@ metadata:
 ## STEP 1 — Log the request (exec, mandatory)
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/scout-log.sh scout_start restaurant="{name or vibe}" city="{city}" party={n} date="{YYYY-MM-DD}" mode={named|discovery}
+exec: bash /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scripts/scout-log.sh scout_start restaurant="{name or vibe}" city="{city}" party={n} date="{YYYY-MM-DD}" mode={named|discovery}
 ```
 
 ---
@@ -36,7 +36,7 @@ exec: bash /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/
 ## STEP 2 — Load knowledge base (exec, mandatory)
 
 ```
-exec: cat /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scout-knowledge.md
+exec: cat /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scout-knowledge.md
 ```
 
 Note your user's `[user:profile]` defaults (home city, usual party). Note any `[restaurant:Name|City]` entries matching the request.
@@ -75,27 +75,27 @@ Use the platform and slug from either the knowledge base entry or the search res
 
 **Resy:**
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform resy --slug {slug} --city {resy-city-code} --party {n} --date {YYYY-MM-DD}
+exec: python3 /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform resy --slug {slug} --city {resy-city-code} --party {n} --date {YYYY-MM-DD}
 ```
 
 **OpenTable:**
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform opentable --slug {slug} --party {n} --date {YYYY-MM-DD} --time {HH:MM}
+exec: python3 /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform opentable --slug {slug} --party {n} --date {YYYY-MM-DD} --time {HH:MM}
 ```
 
 **Tock:**
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform tock --slug {slug} --party {n} --date {YYYY-MM-DD} --time {HH:MM}
+exec: python3 /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform tock --slug {slug} --party {n} --date {YYYY-MM-DD} --time {HH:MM}
 ```
 
 **SevenRooms:**
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform sevenrooms --slug {slug} --party {n} --date {YYYY-MM-DD}
+exec: python3 /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform sevenrooms --slug {slug} --party {n} --date {YYYY-MM-DD}
 ```
 
 **Direct / unknown platform:**
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform direct --url {homepage-url} --party {n} --date {YYYY-MM-DD} --time {HH:MM}
+exec: python3 /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scripts/build-deeplink.py --platform direct --url {homepage-url} --party {n} --date {YYYY-MM-DD} --time {HH:MM}
 ```
 
 **Walk-in or call-only:** No script needed. Note phone number from knowledge base.
@@ -123,7 +123,7 @@ If Chef/Vibe/Dishes/Awards are unknown (search didn't reveal them), omit those f
 Also update `[user:profile]` — append this restaurant to RecentSearches, update CuisinePrefs and HomeCity if inferred.
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/restaurant-scout/scripts/scout-log.sh memory_store restaurant="{name}" platform={platform} note="stored"
+exec: bash /home/openclaw/.openclaw/workspace/skills/restaurant-scout/scripts/scout-log.sh memory_store restaurant="{name}" platform={platform} note="stored"
 ```
 
 ---

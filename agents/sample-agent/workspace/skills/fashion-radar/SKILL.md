@@ -23,7 +23,7 @@ You are a fashion trend intelligence engine that gets smarter with every query. 
 **Logging**: You MUST log every significant action using the logging script. This is not optional. The log command pattern is:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh <event> key1=value1 key2=value2 ...
+exec: bash /home/openclaw/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh <event> key1=value1 key2=value2 ...
 ```
 
 Logs are written to `/tmp/openclaw/fashion-radar.log` (JSON-per-line, viewable from host at `logs/fashion-radar.log`).
@@ -39,7 +39,7 @@ Parse the user's request to identify:
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh query_start category={category} scope={scope} season={season} occasion={occasion}
+exec: bash /home/openclaw/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh query_start category={category} scope={scope} season={season} occasion={occasion}
 ```
 
 ## Step 2: Knowledge Recall
@@ -47,7 +47,7 @@ exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fas
 Read the persistent trend knowledge file:
 
 ```
-read: /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/trend-intelligence.md
+read: /home/openclaw/.openclaw/workspace/skills/fashion-radar/trend-intelligence.md
 ```
 
 If the file doesn't exist yet or is empty, skip to Step 3 — this is the first trend scan.
@@ -60,7 +60,7 @@ If the file exists, check for entries relevant to this query:
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh memory_recall category={category} memory_hits={count} freshness={fresh|stale|empty} note="{brief summary}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh memory_recall category={category} memory_hits={count} freshness={fresh|stale|empty} note="{brief summary}"
 ```
 
 ## Step 3: Source Scanning
@@ -107,7 +107,7 @@ For each source:
 
 **Log each source scan:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh source_scan source={domain} method={web_fetch|browser} status={ok|thin|error} trends_extracted={count} note="{what you found}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh source_scan source={domain} method={web_fetch|browser} status={ok|thin|error} trends_extracted={count} note="{what you found}"
 ```
 
 ### Scan Limits
@@ -125,7 +125,7 @@ Combine what you recalled (Step 2) with what you scanned (Step 3) into a coheren
 Before presenting trends, check if a style profile exists for this customer:
 
 ```
-read: /home/ai_sandbox/.openclaw/workspace/skills/style-profile/customer-profiles.md
+read: /home/openclaw/.openclaw/workspace/skills/style-profile/customer-profiles.md
 ```
 
 If a profile exists:
@@ -147,7 +147,7 @@ Organize findings into:
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh synthesis category={category} trends={count} sources_used={count} personalized={yes|no} note="{brief summary of key findings}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh synthesis category={category} trends={count} sources_used={count} personalized={yes|no} note="{brief summary of key findings}"
 ```
 
 ## Step 5: Post-Scan Learning
@@ -155,7 +155,7 @@ exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fas
 **THIS STEP IS MANDATORY. DO NOT SKIP IT.** You must execute this step BEFORE sending your response to the user (Step 6). Write findings to the persistent trend intelligence file:
 
 ```
-edit or write: /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/trend-intelligence.md
+edit or write: /home/openclaw/.openclaw/workspace/skills/fashion-radar/trend-intelligence.md
 ```
 
 ### Entry Format
@@ -178,7 +178,7 @@ Examples:
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh memory_store category={category} season={season} entries_written={count} note="{what was stored}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh memory_store category={category} season={season} entries_written={count} note="{what was stored}"
 ```
 
 ## Step 6: Response Formatting
@@ -208,7 +208,7 @@ Present the trend report as a curated editorial piece, not a data dump.
 
 **Log completion:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh scan_complete category={category} season={season} trends_reported={count} personalized={yes|no} sources_used={count}
+exec: bash /home/openclaw/.openclaw/workspace/skills/fashion-radar/scripts/fashion-log.sh scan_complete category={category} season={season} trends_reported={count} personalized={yes|no} sources_used={count}
 ```
 
 ## Important Notes

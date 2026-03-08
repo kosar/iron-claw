@@ -29,7 +29,7 @@ Both flows require logging via `style-log.sh`. Skipping either flow is a bug.
 **Logging**: You MUST log every profile read/write using the logging script:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/style-profile/scripts/style-log.sh <event> key1=value1 key2=value2 ...
+exec: bash /home/openclaw/.openclaw/workspace/skills/style-profile/scripts/style-log.sh <event> key1=value1 key2=value2 ...
 ```
 
 Logs are written to `/tmp/openclaw/style-profile.log` (JSON-per-line, viewable from host at `logs/style-profile.log`).
@@ -39,7 +39,7 @@ Logs are written to `/tmp/openclaw/style-profile.log` (JSON-per-line, viewable f
 All profiles are stored in a single persistent file:
 
 ```
-/home/ai_sandbox/.openclaw/workspace/skills/style-profile/customer-profiles.md
+/home/openclaw/.openclaw/workspace/skills/style-profile/customer-profiles.md
 ```
 
 ### Profile Format
@@ -80,14 +80,14 @@ Before giving any product recommendation, trend report, or outfit suggestion —
 ### Step 1: Load Profile
 
 ```
-read: /home/ai_sandbox/.openclaw/workspace/skills/style-profile/customer-profiles.md
+read: /home/openclaw/.openclaw/workspace/skills/style-profile/customer-profiles.md
 ```
 
 Search for the customer's section: `## [customer:{identifier}]`
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/style-profile/scripts/style-log.sh profile_read customer={identifier} status={found|not_found} note="{what you found or 'new customer'}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/style-profile/scripts/style-log.sh profile_read customer={identifier} status={found|not_found} note="{what you found or 'new customer'}"
 ```
 
 ### Step 2: Apply to Context
@@ -127,7 +127,7 @@ If this is a new customer, use `edit` to append a new section to the profiles fi
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/style-profile/scripts/style-log.sh profile_write customer={identifier} fields_updated="{comma-separated field names}" note="{what was learned}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/style-profile/scripts/style-log.sh profile_write customer={identifier} fields_updated="{comma-separated field names}" note="{what was learned}"
 ```
 
 ### Step 3: Update History
@@ -140,7 +140,7 @@ Always append a dated entry to the customer's History section summarizing the in
 
 **Log it:**
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/style-profile/scripts/style-log.sh history_append customer={identifier} note="{interaction summary}"
+exec: bash /home/openclaw/.openclaw/workspace/skills/style-profile/scripts/style-log.sh history_append customer={identifier} note="{interaction summary}"
 ```
 
 ## Privacy Rules
@@ -162,9 +162,9 @@ These are non-negotiable:
 For quick profile lookups without reading the full file:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/style-profile/scripts/profile-manager.sh read {identifier}
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/style-profile/scripts/profile-manager.sh list
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/style-profile/scripts/profile-manager.sh search {keyword}
+exec: bash /home/openclaw/.openclaw/workspace/skills/style-profile/scripts/profile-manager.sh read {identifier}
+exec: bash /home/openclaw/.openclaw/workspace/skills/style-profile/scripts/profile-manager.sh list
+exec: bash /home/openclaw/.openclaw/workspace/skills/style-profile/scripts/profile-manager.sh search {keyword}
 ```
 
 ## Important Notes

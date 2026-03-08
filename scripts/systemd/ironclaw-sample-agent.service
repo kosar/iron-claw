@@ -1,7 +1,7 @@
 # Ironclaw sample-agent — start at boot (systemd)
 # Install: sudo cp scripts/systemd/ironclaw-sample-agent.service /etc/systemd/system/
 #         sudo systemctl daemon-reload && sudo systemctl enable ironclaw-sample-agent.service
-# On default Raspberry Pi OS, change User/Group to pi and paths from /home/kosar/ironclaw to /home/pi/ironclaw.
+# Edit User, Group, WorkingDirectory, and ExecStart* to your user and repo path (e.g. on Pi: User=pi, Group=pi, /home/pi/ironclaw).
 
 [Unit]
 Description=Ironclaw sample-agent at boot
@@ -12,10 +12,10 @@ Wants=docker.service network-online.target
 Type=oneshot
 User=kosar
 Group=kosar
-WorkingDirectory=/home/kosar/ironclaw
-ExecStartPre=/usr/bin/test -f /home/kosar/ironclaw/agents/sample-agent/agent.conf
-ExecStartPre=/usr/bin/test -f /home/kosar/ironclaw/agents/sample-agent/.env
-ExecStart=/home/kosar/ironclaw/scripts/start-sample-agent-at-boot.sh
+WorkingDirectory=/path/to/ironclaw
+ExecStartPre=/usr/bin/test -f /path/to/ironclaw/agents/sample-agent/agent.conf
+ExecStartPre=/usr/bin/test -f /path/to/ironclaw/agents/sample-agent/.env
+ExecStart=/path/to/ironclaw/scripts/start-sample-agent-at-boot.sh
 TimeoutStartSec=600
 StandardOutput=journal
 StandardError=journal

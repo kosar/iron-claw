@@ -82,12 +82,12 @@ Use for: JavaScript-heavy sites, news homepages, interactive pages, sites behind
 
 **Step 1 — Generate:** Run this exact command via `exec`:
 ```
-bash /home/ai_sandbox/.openclaw/workspace/skills/image-gen/scripts/generate-image.sh "detailed prompt describing the image" /tmp/generated-image.png
+bash /home/openclaw/.openclaw/workspace/skills/image-gen/scripts/generate-image.sh "detailed prompt describing the image" /tmp/generated-image.png
 ```
 
 **Step 2 — Send to Telegram:** If Step 1 returned `OK:`, run this via `exec`:
 ```
-bash /home/ai_sandbox/.openclaw/workspace/scripts/send-photo.sh /tmp/generated-image.png "short plain text caption"
+bash /home/openclaw/.openclaw/workspace/scripts/send-photo.sh /tmp/generated-image.png "short plain text caption"
 ```
 
 **Step 3 — Text reply:** Send a brief text message acknowledging the image. Do NOT mention file paths or tools.
@@ -103,13 +103,13 @@ bash /home/ai_sandbox/.openclaw/workspace/scripts/send-photo.sh /tmp/generated-i
 When asked to create a new skill, use the **skill-creator** built-in skill for guidance on skill design, then scaffold the skill using the workspace wrapper script via `exec`:
 
 ```bash
-bash /home/ai_sandbox/.openclaw/workspace/scripts/create-skill.sh <skill-name>
+bash /home/openclaw/.openclaw/workspace/scripts/create-skill.sh <skill-name>
 ```
 
 Optional flags:
 ```bash
-bash /home/ai_sandbox/.openclaw/workspace/scripts/create-skill.sh <skill-name> --resources scripts
-bash /home/ai_sandbox/.openclaw/workspace/scripts/create-skill.sh <skill-name> --resources scripts,references --examples
+bash /home/openclaw/.openclaw/workspace/scripts/create-skill.sh <skill-name> --resources scripts
+bash /home/openclaw/.openclaw/workspace/scripts/create-skill.sh <skill-name> --resources scripts,references --examples
 ```
 
 This creates the skill in the correct location automatically. After scaffolding, edit the generated SKILL.md to fill in the TODO placeholders and add any scripts or references the skill needs.

@@ -13,8 +13,8 @@ After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/kosar/ironclaw
-ExecStart=/home/kosar/ironclaw/scripts/learning-log-bridge.sh pibot
+WorkingDirectory=/path/to/ironclaw
+ExecStart=/path/to/ironclaw/scripts/learning-log-bridge.sh AGENT_NAME
 Restart=on-failure
 RestartSec=10
 

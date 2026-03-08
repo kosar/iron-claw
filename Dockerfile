@@ -16,23 +16,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-noto-color-emoji fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/*
 
-# Rename existing UID-1000 user (node) to ai_sandbox for clarity
-RUN usermod -l ai_sandbox -d /home/ai_sandbox -m node \
-    && groupmod -n ai_sandbox node \
-    && mkdir -p /home/ai_sandbox/.openclaw \
-    && chown -R 1000:1000 /home/ai_sandbox
+# Use dedicated openclaw user (UID 1000) for runtime
+RUN usermod -l openclaw -d /home/openclaw -m node \
+    && groupmod -n openclaw node \
+    && mkdir -p /home/openclaw/.openclaw \
+    && chown -R 1000:1000 /home/openclaw
 
-USER ai_sandbox
-WORKDIR /home/ai_sandbox
+USER openclaw
+WORKDIR /home/openclaw
 
 # Python Playwright + stealth for browser_automation
 RUN pip3 install --break-system-packages playwright playwright-stealth pypdf pymupdf && python3 -m playwright install chromium
 
 # Install OpenClaw via official installer
 RUN curl -fsSL --proto "=https" --tlsv1.2 https://openclaw.ai/install.sh | bash \
-    || [ -f /home/ai_sandbox/.npm-global/bin/openclaw ]
+    || [ -f /home/openclaw/.npm-global/bin/openclaw ]
 
-ENV PATH="/home/ai_sandbox/.npm-global/bin:${PATH}"
+ENV PATH="/home/openclaw/.npm-global/bin:${PATH}"
 
 EXPOSE 18789
 

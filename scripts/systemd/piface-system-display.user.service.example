@@ -11,8 +11,8 @@ Wants=piface-bridge.service
 
 [Service]
 Type=oneshot
-WorkingDirectory=/home/kosar/ironclaw
-ExecStart=/home/kosar/ironclaw/scripts/piface-system-display.sh
+WorkingDirectory=/path/to/ironclaw
+ExecStart=/path/to/ironclaw/scripts/piface-system-display.sh
 
 [Install]
 WantedBy=default.target

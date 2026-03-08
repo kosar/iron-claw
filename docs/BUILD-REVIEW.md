@@ -118,7 +118,7 @@ Run on the **Intel Mac** (macbookpro.lan):
 
 4. **Tunnel from local Mac**  
    On your local machine:  
-   `ssh -f -N -L 18790:127.0.0.1:18789 ai_sandbox@macbookpro.lan`  
+   `ssh -f -N -L 18790:127.0.0.1:18789 <your-user>@<your-host>.lan`  
    Then: `curl -s -w "%{http_code}" -o /dev/null http://127.0.0.1:18790/`  
    Expect: connection works (empty reply or 000 is OK; connection refused = tunnel or gateway down).
 

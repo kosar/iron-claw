@@ -34,7 +34,7 @@ Use this **in addition to** your normal reply. Do not mention "PiGlow" or "LED" 
 Run once at the start of your work (optional but recommended):
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh thinking
+exec: bash /home/openclaw/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh thinking
 ```
 
 No need to check return value. Continue with your tools and skills as usual.
@@ -44,11 +44,11 @@ No need to check return value. Continue with your tools and skills as usual.
 Before or after sending your reply, set the outcome:
 
 - **Success:**  
-  `exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh success`
+  `exec: bash /home/openclaw/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh success`
 - **Error / failed:**  
-  `exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh error`
+  `exec: bash /home/openclaw/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh error`
 - **Warning / partial:**  
-  `exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh warning`
+  `exec: bash /home/openclaw/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh warning`
 
 You can run this in the same run as your final message. Do not wait for or interpret the script output.
 
@@ -57,7 +57,7 @@ You can run this in the same run as your final message. Do not wait for or inter
 When the conversation is idle and you are ready for the next request:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh idle
+exec: bash /home/openclaw/.openclaw/workspace/skills/piglow-signal/scripts/signal.sh idle
 ```
 
 Or `off` to turn all LEDs off.

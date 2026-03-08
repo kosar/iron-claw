@@ -4,16 +4,17 @@
 # For start at boot without login: loginctl enable-linger $USER
 # Logs: journalctl --user -u audio-bridge.service -f
 # Mic: set AUDIO_CAPTURE_DEVICE from arecord -L (e.g. plughw:CARD=Camera,DEV=0).
+# Edit REPO_ROOT and AGENT_NAME below to match your repo path and agent (e.g. /home/pi/ironclaw, sample-agent).
 
 [Unit]
-Description=Audio bridge for pibot (mic + playback + transcribe, port 18796)
+Description=Audio bridge (mic + playback + transcribe, port 18796)
 After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/kosar/ironclaw
+WorkingDirectory=/path/to/ironclaw
 Environment=AUDIO_CAPTURE_DEVICE=plughw:CARD=Camera,DEV=0
-ExecStart=/usr/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/audio/audio_bridge_service.py
+ExecStart=/usr/bin/python3 /path/to/ironclaw/agents/AGENT_NAME/workspace/audio/audio_bridge_service.py
 Restart=on-failure
 RestartSec=5
 

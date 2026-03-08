@@ -11,7 +11,7 @@ Call the **exec** tool with these MANDATORY parameters:
 
 ```json
 {
-  "command": "bash /home/ai_sandbox/.openclaw/workspace/skills/image-gen/scripts/generate-image.sh \"your detailed prompt\"",
+  "command": "bash /home/openclaw/.openclaw/workspace/skills/image-gen/scripts/generate-image.sh \"your detailed prompt\"",
   "yieldMs": 120000,
   "timeout": 300
 }
@@ -36,7 +36,7 @@ Extract the file path from step 1's output (the last colon-separated field), the
 
 ```json
 {
-  "command": "bash /home/ai_sandbox/.openclaw/workspace/scripts/send-photo.sh <path-from-step-1> \"your caption here\"",
+  "command": "bash /home/openclaw/.openclaw/workspace/scripts/send-photo.sh <path-from-step-1> \"your caption here\"",
   "timeout": 30
 }
 ```
@@ -69,7 +69,7 @@ If the script returns `UNAVAILABLE`, tell the user image generation isn't availa
 
 To refresh the list of known Ollama hosts:
 
-    bash /home/ai_sandbox/.openclaw/workspace/skills/image-gen/scripts/discover-ollama.sh /home/ai_sandbox/.openclaw/workspace/skills/image-gen/ollama-hosts.json
+    bash /home/openclaw/.openclaw/workspace/skills/image-gen/scripts/discover-ollama.sh /home/openclaw/.openclaw/workspace/skills/image-gen/ollama-hosts.json
 
 ## Prompt tips
 

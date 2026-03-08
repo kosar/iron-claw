@@ -83,7 +83,7 @@ This document records **what was built**, **what code was written**, **how it wo
   - New **commands or intents** (e.g. “/lastscan” or “list recent scans”): add a new skill or extend this skill’s pipeline; if you need more state, have the daemon write it (e.g. `scans.jsonl` or `recent.json`) under `workspace/rfid/` and read it from the skill.  
   - New **Telegram notifications** (e.g. only for certain tag IDs): change the daemon to check `tag_id` or use a mapping under `workspace/rfid/` before calling the Telegram API.
 
-- **Consistency:** New skills: `bash /home/ai_sandbox/.openclaw/workspace/scripts/create-skill.sh <name>`. Document any new tools in `agents/pibot/workspace/TOOLS.md` and behavior in `AGENTS.md`.
+- **Consistency:** New skills: `bash /home/openclaw/.openclaw/workspace/scripts/create-skill.sh <name>`. Document any new tools in `agents/pibot/workspace/TOOLS.md` and behavior in `AGENTS.md`.
 
 ---
 

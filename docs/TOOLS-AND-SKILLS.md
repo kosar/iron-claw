@@ -136,7 +136,7 @@ Add the same variable to `.env` and ensure the container receives it (see “Pas
 
 - **Installing more skills**  
   OpenClaw can load skills from:
-  - `~/.openclaw/skills` (in the container: `/home/node/.openclaw/skills`)
+  - `~/.openclaw/skills` (in the container: `/home/openclaw/.openclaw/skills`)
   - `<workspace>/skills` (your workspace is mounted)
 
   To install from [ClawHub](https://clawhub.com) you typically run on a host where the OpenClaw CLI is installed, then copy the skill into a folder that is mounted or baked into the image. For a Docker-only setup, you’d either:

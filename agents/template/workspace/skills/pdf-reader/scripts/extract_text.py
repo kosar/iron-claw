@@ -2,14 +2,14 @@
 """
 Extract text from a PDF file. Output is UTF-8 to stdout.
 Usage: extract_text.py <path-to-pdf> [--max-chars N]
-Path must be under workspace (e.g. /home/ai_sandbox/.openclaw/workspace).
+Path must be under workspace (e.g. /home/openclaw/.openclaw/workspace).
 Runs the PDF-to-images garbage collector once at start (no-op if disk free >= 20%).
 """
 import subprocess
 import sys
 from pathlib import Path
 
-WORKSPACE_PREFIX = "/home/ai_sandbox/.openclaw/workspace"
+WORKSPACE_PREFIX = "/home/openclaw/.openclaw/workspace"
 DEFAULT_MAX_CHARS = 100_000
 
 

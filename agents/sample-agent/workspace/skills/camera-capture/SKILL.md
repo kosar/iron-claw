@@ -29,7 +29,7 @@ The camera hardware is on the **Pi host**. A small HTTP service on the host capt
 Run the script that triggers the host capture and sends the image. You MUST use this single command so the photo is actually sent to Telegram:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/camera-capture/scripts/capture-and-send.sh
+exec: bash /home/openclaw/.openclaw/workspace/skills/camera-capture/scripts/capture-and-send.sh
 ```
 
 If the exec returns CAPTURE_FAILED or NO_IMAGE or exits non-zero, go to Step 2 with failure. If it succeeds (you see "Sent via Telegram" or similar in the output), go to Step 2 with success.

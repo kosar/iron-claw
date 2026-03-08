@@ -1,7 +1,7 @@
 # Ironclaw pibot — start at boot (systemd)
 # Install: sudo cp scripts/systemd/ironclaw-pibot.service /etc/systemd/system/
 #         sudo systemctl daemon-reload && sudo systemctl enable ironclaw-pibot.service
-# On default Raspberry Pi OS, change User/Group to pi and paths from /home/kosar/ironclaw to /home/pi/ironclaw.
+# Edit User, Group, WorkingDirectory, and ExecStart* to your user and repo path (e.g. on Pi: User=pi, Group=pi, /home/pi/ironclaw). Agent name pibot is the Pi-style example; replace with your agent name if different.
 
 [Unit]
 Description=Ironclaw pibot agent at boot
@@ -12,11 +12,11 @@ Wants=docker.service network-online.target
 Type=oneshot
 User=kosar
 Group=kosar
-WorkingDirectory=/home/kosar/ironclaw
+WorkingDirectory=/path/to/ironclaw
 # Pre-flight: fail if agent or .env missing (replace path if repo is elsewhere)
-ExecStartPre=/usr/bin/test -f /home/kosar/ironclaw/agents/pibot/agent.conf
-ExecStartPre=/usr/bin/test -f /home/kosar/ironclaw/agents/pibot/.env
-ExecStart=/home/kosar/ironclaw/scripts/start-pibot-at-boot.sh
+ExecStartPre=/usr/bin/test -f /path/to/ironclaw/agents/pibot/agent.conf
+ExecStartPre=/usr/bin/test -f /path/to/ironclaw/agents/pibot/.env
+ExecStart=/path/to/ironclaw/scripts/start-pibot-at-boot.sh
 TimeoutStartSec=600
 StandardOutput=journal
 StandardError=journal

@@ -7,11 +7,11 @@
 #   profile-manager.sh search <keyword>    — Search profiles for a keyword
 #
 # The profiles file is the single source of truth:
-#   /home/ai_sandbox/.openclaw/workspace/skills/style-profile/customer-profiles.md
+#   /home/openclaw/.openclaw/workspace/skills/style-profile/customer-profiles.md
 
 set -uo pipefail
 
-PROFILES="/home/ai_sandbox/.openclaw/workspace/skills/style-profile/customer-profiles.md"
+PROFILES="/home/openclaw/.openclaw/workspace/skills/style-profile/customer-profiles.md"
 COMMAND="${1:?Usage: profile-manager.sh <read|list|search> [arg]}"
 
 if [ ! -f "$PROFILES" ]; then

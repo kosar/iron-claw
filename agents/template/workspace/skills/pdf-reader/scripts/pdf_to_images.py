@@ -9,7 +9,7 @@ import argparse
 import sys
 from pathlib import Path
 
-WORKSPACE_PREFIX = "/home/ai_sandbox/.openclaw/workspace"
+WORKSPACE_PREFIX = "/home/openclaw/.openclaw/workspace"
 
 
 def is_under_workspace(path: Path) -> bool:

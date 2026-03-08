@@ -28,7 +28,7 @@ The RFID hardware is read by a **host daemon** on the Pi (not inside the contain
 Read the file written by the host daemon:
 
 ```
-read: /home/ai_sandbox/.openclaw/workspace/rfid/last_scan.json
+read: /home/openclaw/.openclaw/workspace/rfid/last_scan.json
 ```
 
 If the file does not exist or is empty, go to Step 2 with no data.
@@ -41,7 +41,7 @@ If the file does not exist or is empty, go to Step 2 with no data.
 Optional: for a single-line summary you can exec the formatter script instead of parsing in-context:
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/rfid-reader/scripts/format-last-scan.sh
+exec: bash /home/openclaw/.openclaw/workspace/skills/rfid-reader/scripts/format-last-scan.sh
 ```
 
 Use the script output as the basis for your reply. If the script exits non-zero or prints nothing, treat as no recent scan.

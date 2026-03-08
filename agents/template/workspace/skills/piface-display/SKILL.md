@@ -18,21 +18,21 @@ The PiFace CAD is a **16x2 character physical display**.
 Use this during tasks. Text will be shown for 60s.
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piface-display/scripts/display.sh "L1:Subject" "L2:Status"
+exec: bash /home/openclaw/.openclaw/workspace/skills/piface-display/scripts/display.sh "L1:Subject" "L2:Status"
 ```
 
 ## 📊 Update Admin Stats (Persistent)
 Use at the end of runs. This updates the permanent dashboard.
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piface-display/scripts/admin.sh "<user>" "<action>" "<balance>"
+exec: bash /home/openclaw/.openclaw/workspace/skills/piface-display/scripts/admin.sh "<user>" "<action>" "<balance>"
 ```
 
 ## 🚀 Startup Banner
 Use only during startup/heartbeat. Stays for 5 mins.
 
 ```
-exec: bash /home/ai_sandbox/.openclaw/workspace/skills/piface-display/scripts/startup.sh "Line 1" "Line 2"
+exec: bash /home/openclaw/.openclaw/workspace/skills/piface-display/scripts/startup.sh "Line 1" "Line 2"
 ```
 
 ## Rules

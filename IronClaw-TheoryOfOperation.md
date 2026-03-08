@@ -51,7 +51,7 @@ The host holds the source of truth:
 
 At start we build a **runtime** view:
 
-- `agents/{name}/config-runtime/` — Copy/sync of `config/` with specific exclusions so we keep sessions, memory DB, and other container-written state. The **container mounts only config-runtime** at `/home/ai_sandbox/.openclaw`. So from the container's perspective, "config" is whatever is in config-runtime. We own that directory; we repopulate it from `config/` on every `compose-up` (except excluded paths).
+- `agents/{name}/config-runtime/` — Copy/sync of `config/` with specific exclusions so we keep sessions, memory DB, and other container-written state. The **container mounts only config-runtime** at `/home/openclaw/.openclaw`. So from the container's perspective, "config" is whatever is in config-runtime. We own that directory; we repopulate it from `config/` on every `compose-up` (except excluded paths).
 
 **Constraint:** The container has no way to overwrite `config/`. It can write only to config-runtime (which we can resync) and to the mounted workspace and logs. A bad run cannot corrupt the canonical config on the host.
 
@@ -61,8 +61,8 @@ Compose is run from `agents/{name}/`. The generated `docker-compose.yml` (from `
 
 | Host path (relative to agent dir) | Container path | Writable by container |
 |-----------------------------------|----------------|------------------------|
-| `./config-runtime`                | `/home/ai_sandbox/.openclaw` | Yes (sessions, memory, browser state, etc.) |
-| `./workspace`                     | `/home/ai_sandbox/.openclaw/workspace` | Yes |
+| `./config-runtime`                | `/home/openclaw/.openclaw` | Yes (sessions, memory, browser state, etc.) |
+| `./workspace`                     | `/home/openclaw/.openclaw/workspace` | Yes |
 | `./logs`                          | `/tmp/openclaw` and `/tmp/openclaw-1000` | Yes |
 
 The **workspace** mount is a separate bind mount that overlays the `workspace` subtree of the first mount. So the container's view of `.openclaw/workspace` is **always** the host's `agents/{name}/workspace/`. Any file we write under the host's `agents/{name}/workspace/` (e.g. `workspace/skills/send-email/.env`) is visible inside the container at `.openclaw/workspace/...`. The container never sees `config-runtime/workspace/` at runtime because the workspace mount takes precedence.
@@ -135,7 +135,7 @@ So we constrain: for agents that run in **our** Docker container (e.g. pibot on 
 
 Tools such as **write** and **exec** both run inside the same container when exec host is gateway. They share the same filesystem view. However, if the agent used **write** to create a file in `/tmp` and then passed that path to **exec**, we previously hit failures in practice: OpenClaw's write tool may write to a path that is not the same as the exec process's `/tmp` (e.g. if there were any sandbox or subprocess isolation), or the path may not be visible. To avoid that class of bug we enforce a single rule:
 
-**Any file that the agent creates (e.g. via write) and then passes to an exec command, or any path that one exec produces and a later exec must read, must live under the workspace** — i.e. under `/home/ai_sandbox/.openclaw/workspace/...`, which is the mounted host workspace. Both the write tool and the exec process see that mount, so the path is valid for both. We document this as Rule 6b in agent guidelines (AGENTS.md) and in skill docs (e.g. send-email: body file in workspace; image-gen: script writes output under the skill dir in workspace so the "send photo" exec can read it).
+**Any file that the agent creates (e.g. via write) and then passes to an exec command, or any path that one exec produces and a later exec must read, must live under the workspace** — i.e. under `/home/openclaw/.openclaw/workspace/...`, which is the mounted host workspace. Both the write tool and the exec process see that mount, so the path is valid for both. We document this as Rule 6b in agent guidelines (AGENTS.md) and in skill docs (e.g. send-email: body file in workspace; image-gen: script writes output under the skill dir in workspace so the "send photo" exec can read it).
 
 **Concrete applications:**
 
@@ -159,7 +159,7 @@ All agents use the same hardening in the compose template:
 - **Read-only root filesystem** — Writable only where volumes are mounted (.openclaw, .openclaw/workspace, /tmp/openclaw, and /tmp for tmpfs).
 - **Capabilities** — `cap_drop: [ALL]`.
 - **Privilege escalation** — `security_opt: [no-new-privileges:true]`.
-- **User** — `user: "1000:1000"` (ai_sandbox). Not root.
+- **User** — `user: "1000:1000"` (openclaw). Not root.
 - **tmpfs for /tmp** — Size-limited, uid/gid 1000.
 - **Port** — Host mapping is `127.0.0.1:${AGENT_PORT}:${AGENT_PORT}` so the gateway is only reachable on the host's loopback unless the operator changes it.
 - **Init** — `init: true` (tini) to reap zombies (e.g. from Chromium).

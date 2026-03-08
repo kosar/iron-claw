@@ -2,7 +2,7 @@
 """
 Test browser_automation provider against known tricky sites.
 Run inside the pibot container after image build:
-  docker exec <pibot_secure> python3 /home/ai_sandbox/.openclaw/workspace/skills/productwatcher/scripts/test_browser_provider.py [url ...]
+  docker exec <pibot_secure> python3 /home/openclaw/.openclaw/workspace/skills/productwatcher/scripts/test_browser_provider.py [url ...]
 Exit 0 if at least one URL returns a snapshot with data; non-zero otherwise.
 """
 

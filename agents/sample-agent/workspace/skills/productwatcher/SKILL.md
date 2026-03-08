@@ -107,13 +107,13 @@ Load watches.json, filter `enabled: true and archived: false`, return formatted 
 Execute the watcher engine via cron/heartbeat:
 
 ```bash
-python3 /home/ai_sandbox/.openclaw/workspace/skills/productwatcher/scripts/watcher_engine.py
+python3 /home/openclaw/.openclaw/workspace/skills/productwatcher/scripts/watcher_engine.py
 ```
 
 Or check status:
 
 ```bash
-python3 /home/ai_sandbox/.openclaw/workspace/skills/productwatcher/scripts/watcher_engine.py --status
+python3 /home/openclaw/.openclaw/workspace/skills/productwatcher/scripts/watcher_engine.py --status
 ```
 
 ## Provider Engine (Three-Tier)

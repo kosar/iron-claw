@@ -10,8 +10,8 @@ After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/kosar/ironclaw
-ExecStart=/usr/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/camera/capture_service.py
+WorkingDirectory=/path/to/ironclaw
+ExecStart=/usr/bin/python3 /path/to/ironclaw/agents/AGENT_NAME/workspace/camera/capture_service.py
 Restart=on-failure
 RestartSec=5
 

@@ -31,7 +31,7 @@ bash scripts/setup-cron.sh
 crontab -e
 
 # Add this line (runs every hour):
-0 * * * * cd /home/ai_sandbox/.openclaw/workspace/skills/productwatcher && /usr/bin/python3 scripts/watcher_engine.py >> watcher_vault/logs/cron-$(date +\%Y\%m\%d).log 2>&1
+0 * * * * cd /home/openclaw/.openclaw/workspace/skills/productwatcher && /usr/bin/python3 scripts/watcher_engine.py >> watcher_vault/logs/cron-$(date +\%Y\%m\%d).log 2>&1
 ```
 
 ### Option 2: OpenClaw Gateway Cron (If Gateway Available)
@@ -44,7 +44,7 @@ Add via `openclaw gateway` or cron API:
   "schedule": {"kind": "every", "everyMs": 3600000},
   "payload": {
     "kind": "systemEvent",
-    "text": "python3 /home/ai_sandbox/.openclaw/workspace/skills/productwatcher/scripts/watcher_engine.py"
+    "text": "python3 /home/openclaw/.openclaw/workspace/skills/productwatcher/scripts/watcher_engine.py"
   },
   "sessionTarget": "main",
   "enabled": true

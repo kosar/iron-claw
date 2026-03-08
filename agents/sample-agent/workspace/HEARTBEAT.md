@@ -16,7 +16,7 @@ If `workspace/TODO.md` exists and contains `## [ ]` entries:
    - All tasks are now done (completion notice)
    - It has been **24 hours or more** since the last onboarding email (check `workspace/onboarding-log.md` for the last `[emailed]` entry)
    - This is the very first heartbeat with TODO.md present (initial status)
-8. If emailing: use `bash /home/ai_sandbox/.openclaw/workspace/scripts/send-email.sh` and log `[emailed]` with timestamp to onboarding-log.md
+8. If emailing: use `bash /home/openclaw/.openclaw/workspace/scripts/send-email.sh` and log `[emailed]` with timestamp to onboarding-log.md
 9. If email fails, log the failure to onboarding-log.md and continue — never surface to chat
 10. If all tasks are done: write final summary to onboarding-log.md, email the owner a completion notice, rename TODO.md → TODO.done.md
 11. Do NOT mention onboarding in any chat channel response

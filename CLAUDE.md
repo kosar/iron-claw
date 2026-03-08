@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ironclaw-core** is a factory system for spinning up hardened OpenClaw agent deployments on Docker (2019 Intel MacBook Pro, 32GB). Each agent gets its own personality, skills, channels, secrets, and container while sharing the base Docker image and operational scripts.
+**IronClaw** is a factory system for spinning up hardened OpenClaw agent deployments on Docker. Each agent gets its own personality, skills, channels, secrets, and container while sharing the base Docker image and operational scripts. Runs on any Docker host (e.g. Mac, Linux, Raspberry Pi).
 
 - **Container image:** `ironclaw:2.0` (custom source build via `openclaw.ai/install.sh`, Node.js, runs `gateway` command)
 - **Agents live in:** `agents/{name}/` — each is a fully self-contained OpenClaw deployment
@@ -84,7 +84,7 @@ ironclaw/                           # repo root = ironclaw-core
     watch-logs.sh, check-logs.sh, etc.  # all parameterized via lib.sh
   agents/
     template/                       # full OpenClaw-defaults skeleton for new agents
-    sample-agent/                   # primary agent (migrated from original ironclaw)
+    sample-agent/                   # runnable example agent
       agent.conf                    # AGENT_NAME, PORT, container, resources
       .env                          # secrets (gitignored)
       config/                       # OpenClaw config (host-side, immutable)
@@ -92,8 +92,6 @@ ironclaw/                           # repo root = ironclaw-core
       config-runtime/               # generated at runtime (gitignored)
       logs/                         # per-agent logs (gitignored)
       docker-compose.yml            # generated from template (gitignored)
-    sample-agent/                       # fashion shopping concierge agent
-      ...                           # same structure as sample-agent
 ```
 
 ### Per-Agent Config (`agent.conf`)
@@ -105,32 +103,32 @@ Each agent has an `agent.conf` that defines deployment parameters:
 - `AGENT_MEM_LIMIT` — RAM limit
 - `AGENT_CPUS` — CPU limit
 - `AGENT_SHM_SIZE` — shared memory for Chromium
-- `EXEC_HOST` — optional; set to `gateway` for pibot-type agents (exec in container, no Docker sandbox). Compose-up uses this so any agent prototyped from pibot gets the same exec behavior.
+- `EXEC_HOST` — optional; set to `gateway` for agents that run exec in the same container (e.g. Raspberry Pi, no Docker sandbox). Compose-up injects this so exec runs in the gateway container.
 
 ### Naming: host, agent, channel handle
 
-Three distinct named entities (especially for agents like pibot that run on multiple hosts):
+Three distinct named entities (especially for agents that run on multiple hosts, e.g. Pi + Mac):
 
-1. **Host** — The physical machine (Raspberry Pi, MacBook Pro, etc.). Hostname on the LAN is mainly for the operator; the agent rarely needs it.
-2. **Agent name** — The repo-level name in `agents/{name}/` (e.g. pibot). One per folder: shared personality, skills, defaults. Deployed instances drift; the operator merges lessons from all instances back into the repo. Avoid putting host- or instance-specific content in shared workspace files (e.g. AGENTS.md); use TOOLS.md per-host sections or operator docs instead.
-3. **Channel handle** — How users reach a given instance on a channel (e.g. @your_bot on Telegram). See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [docs/RECREATING-PIBOT.md](docs/RECREATING-PIBOT.md). Depends on the instance and enabled channels; separate from host and agent.
+1. **Host** — The physical machine (Raspberry Pi, Mac, etc.). Hostname on the LAN is mainly for the operator; the agent rarely needs it.
+2. **Agent name** — The repo-level name in `agents/{name}/` (e.g. sample-agent, mybot). One per folder: shared personality, skills, defaults. Avoid putting host- or instance-specific content in shared workspace files (e.g. AGENTS.md); use operator docs or per-host config instead.
+3. **Channel handle** — How users reach a given instance on a channel (e.g. @your_bot on Telegram). See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [docs/RECREATING-PIBOT.md](docs/RECREATING-PIBOT.md) for allowlists and pairing.
 
-See `agents/pibot/workspace/IDENTITY.md` for the full three-entity model and display rules.
+For Pi-style agents with identity/display rules, see [docs/RECREATING-PIBOT.md](docs/RECREATING-PIBOT.md) and [docs/RASPBERRY-PI-RUNBOOK.md](docs/RASPBERRY-PI-RUNBOOK.md).
 
 ### Config Separation
 
-The container never writes to `config/`. The `compose-up.sh` script syncs `config/` into `config-runtime/`, and the container mounts only `config-runtime/` (at `/home/ai_sandbox/.openclaw`). This keeps host-side config immutable. The sync preserves sessions and container-written files (like `models.json`, `memory/main.sqlite`) unless `--fresh` is used.
+The container never writes to `config/`. The `compose-up.sh` script syncs `config/` into `config-runtime/`, and the container mounts `config-runtime/` as the OpenClaw home directory. This keeps host-side config immutable. The sync preserves sessions and container-written files (like `models.json`, `memory/main.sqlite`) unless `--fresh` is used.
 
 Host `workspace/AGENTS.md` is prepended into `config-runtime/workspace/AGENTS.md` by `compose-up.sh`. Host `workspace/skills/` and `workspace/scripts/` are rsynced into `config-runtime/workspace/`.
 
-**Exec approval self-heal:** On every run, `compose-up.sh` enforces `tools.exec.security: "full"` and `ask: "off"` in config-runtime. Agents with **`EXEC_HOST=gateway`** in `agent.conf` (or the agent named **pibot**) get `tools.exec.host: "gateway"` and `agents.defaults.sandbox.mode: "off"` — so any agent prototyped from pibot can set that one variable and get exec in the container without Docker. Other agents get `host: "sandbox"` so exec runs in a Docker sandbox when available.
+**Exec approval self-heal:** On every run, `compose-up.sh` enforces `tools.exec.security: "full"` and `ask: "off"` in config-runtime. Agents with **`EXEC_HOST=gateway`** in `agent.conf` get `tools.exec.host: "gateway"` and `agents.defaults.sandbox.mode: "off"` (exec runs in the same container; used e.g. on Raspberry Pi where there is no Docker sandbox). Other agents get `host: "sandbox"` so exec would run in a separate Docker container when available.
 
 ### Volume Mounts (per agent)
 
 | Host Path | Container Path | Purpose |
 |-----------|---------------|---------|
-| `agents/{name}/config-runtime/` | `/home/ai_sandbox/.openclaw` | Gateway config + agent state (rw) |
-| `agents/{name}/workspace/` | `/home/ai_sandbox/.openclaw/workspace` | Agent guidelines + skills (rw) |
+| `agents/{name}/config-runtime/` | OpenClaw home (see `scripts/docker-compose.yml.tmpl`) | Gateway config + agent state (rw) |
+| `agents/{name}/workspace/` | OpenClaw home `/workspace` | Agent guidelines + skills (rw) |
 | `agents/{name}/logs/` | `/tmp/openclaw` and `/tmp/openclaw-1000` | App logs (rw) |
 
 ### Security Hardening
@@ -232,7 +230,7 @@ When `gateway.bind` is `"lan"`, OpenClaw requires a Control UI origin policy or 
 
 `Gateway failed to start: Error: non-loopback Control UI requires gateway.controlUi.allowedOrigins (set explicit origins), or set gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true`
 
-**Impact of removing it:** The gateway never starts. The container may show "healthy" (TCP only), but the app exits; Telegram, webhooks, and all channel traffic get no response. Do not remove or "clean up" `controlUi` on LAN-bound agents (e.g. pibot on Pi). Use either explicit `allowedOrigins` or `dangerouslyAllowHostHeaderOriginFallback: true` (see `docs/RASPBERRY-PI-RUNBOOK.md`). Changing or tightening this can cause regressions — test gateway and channels after any change.
+**Impact of removing it:** The gateway never starts. The container may show "healthy" (TCP only), but the app exits; Telegram, webhooks, and all channel traffic get no response. Do not remove or "clean up" `controlUi` on LAN-bound agents. Use either explicit `allowedOrigins` or `dangerouslyAllowHostHeaderOriginFallback: true` (see `docs/RASPBERRY-PI-RUNBOOK.md`). Test gateway and channels after any change.
 
 **What this setting does NOT affect:** `controlUi` only affects which browser origins can talk to the gateway's Control UI. It does **not** affect outbound requests from the agent (e.g. PiGlow, camera, RFID, host scripts). If PiGlow or other host bridges stop working after a config change, the cause is elsewhere: host service running, `host.docker.internal` / Docker networking, or (for PiGlow) `PIGLOW_SIGNAL_URL` in the agent's `.env` to point at the host (e.g. `http://<host-ip>:18793/signal`) if needed.
 
@@ -242,17 +240,18 @@ Fixing one thing (e.g. gateway start) can mask or coincide with other breakage. 
 
 1. **Gateway:** `./scripts/test-gateway-http.sh <agent>` — must return JSON, not "Connection reset by peer".
 2. **Channels:** Send a test message (Telegram, etc.) and confirm the agent replies.
-3. **Host bridges (pibot on Pi):** If the agent uses PiGlow, camera, or log bridge, confirm they still work (e.g. PiGlow service running on host, `curl http://127.0.0.1:18793/health` on host; from container, `host.docker.internal:18793` is used by the skill — if that fails, set `PIGLOW_SIGNAL_URL=http://<host-ip>:18793/signal` in `agents/pibot/.env` and restart).
+3. **Host bridges (Pi-style agents):** If the agent uses PiGlow, camera, or log bridge, confirm they still work (e.g. PiGlow service on host, `curl http://127.0.0.1:18793/health`; from container, `host.docker.internal:18793` is used by the skill — if that fails, set `PIGLOW_SIGNAL_URL=http://<host-ip>:18793/signal` in the agent's `.env` and restart).
 
 ---
 
 ## Common Pitfalls — Read Before Touching Config or Skills
 
-### pibot: Do NOT set `tools.exec.host` to `"node"`
-pibot has **nodes and canvas denied** (`tools.deny: ["nodes", "canvas"]`). If `tools.exec.host` is set to `"node"`, OpenClaw will only run exec when a "node" is paired. With no nodes, **every exec (including ir-blast, piglow-signal, camera scripts) is blocked** and the agent may say the "host service isn't paired" or that a feature isn't available. Leave `tools.exec` **without** a `host` field so exec runs in the container (gateway). IR, PiGlow, and camera skills need exec in the container; host access is via device passthrough or HTTP to the host, not via a paired node.
+### Pi-style agents: Do NOT set `tools.exec.host` to `"node"`
+Agents that run with **nodes and canvas denied** (`tools.deny: ["nodes", "canvas"]`) must not have `tools.exec.host` set to `"node"`. If set to `"node"`, OpenClaw only runs exec when a "node" is paired; with no nodes, **every exec (including ir-blast, piglow-signal, camera scripts) is blocked**. Leave exec so it runs in the container (gateway). IR, PiGlow, and camera skills need exec in the container; host access is via device passthrough or HTTP to the host, not via a paired node.
 
-### Why exec "suddenly" became blocked (pibot)
-If pibot worked one day and reported "exec blocked" or "sandbox runtime unavailable" the next (e.g. after a restart or 12 hours later), the cause was **compose-up.sh** overwriting config-runtime: it used to set `tools.exec.host = "sandbox"` for **every** agent. Each run of compose-up (restart, reboot, or manual) re-applied that, so pibot’s runtime config reverted to sandbox even though the container has no Docker. The script now enforces **per-agent** values: any agent with **`EXEC_HOST=gateway`** in `agent.conf` (or the agent named **pibot**) gets `host: "gateway"` and `agents.defaults.sandbox.mode: "off"`; other agents get `host: "sandbox"`. Agents prototyped from pibot should set `EXEC_HOST=gateway` in their `agent.conf`. Re-run `./scripts/compose-up.sh <agent> -d` to apply.
+### Why exec "suddenly" became blocked (EXEC_HOST=gateway agents)
+If an agent that should run exec in the container one day reported "exec blocked" or "sandbox runtime unavailable" after a restart, the cause was **compose-up.sh** overwriting config-runtime with `tools.exec.host = "sandbox"` for every agent. The script now enforces **per-agent** values — any agent with **`EXEC_HOST=gateway`** in `agent.conf` gets `host: "gateway"` and `agents.defaults.sandbox.mode: "off"`; other agents get `host: "sandbox"`. Set `EXEC_HOST=gateway` in `agent.conf` for Pi-style agents, then run `./scripts/compose-up.sh <agent> -d` to apply.
+pibot’s runtime config reverted to sandbox even though the container has no Docker. The script now enforces **per-agent** values: any agent with **`EXEC_HOST=gateway`** in `agent.conf` gets `host: "gateway"` and `agents.defaults.sandbox.mode: "off"`; other agents get `host: "sandbox"`. Set `EXEC_HOST=gateway` in `agent.conf` for Pi-style agents, then run `./scripts/compose-up.sh <agent> -d` to apply.
 
 ### NEVER use `jq` in skill scripts — use `python3` or `node` instead
 
@@ -294,18 +293,18 @@ If a skill script can't find a file, **fix the path logic in the script**. The c
 - Note: `gpt-5-mini` is inherently a reasoning model and still emits `thinkingSignature` even with `false`; the flag reduces but doesn't eliminate this
 
 ### Skill scripts run inside the container — paths differ from the host
-Scripts invoked via `exec` run **inside the container**, not on the Mac host. The path layout inside the container is:
+Scripts invoked via `exec` run **inside the container**, not on the host. Key paths inside the container (exact mount paths are in `scripts/docker-compose.yml.tmpl`):
 
-| What | Container Path | Notes |
-|------|---------------|-------|
-| OpenClaw config | `/home/ai_sandbox/.openclaw/openclaw.json` | NOT `agents/main/config/openclaw.json` |
-| App logs | `/tmp/openclaw/openclaw-YYYY-MM-DD.log` | NOT `agents/main/logs/` (that dir is empty) |
-| Gateway token | `$OPENCLAW_GATEWAY_TOKEN` env var | No `.env` file exists inside the container |
-| Workspace | `/home/ai_sandbox/.openclaw/workspace/` | Mounted from host `workspace/` |
+| What | Where (in container) | Notes |
+|------|----------------------|-------|
+| OpenClaw config | OpenClaw home `openclaw.json` | Not under `agents/main/config/` |
+| App logs | `/tmp/openclaw/openclaw-YYYY-MM-DD.log` | Daily rotation |
+| Gateway token | `$OPENCLAW_GATEWAY_TOKEN` env var | From `.env` via compose |
+| Workspace | OpenClaw home `workspace/` | Mounted from host `agents/{name}/workspace/` |
 | model_switches.log | `/tmp/openclaw/model_switches.log` | Written by switch-tier.sh |
-| Sessions | **SQLite only** (`memory/main.sqlite`) | `agents/main/sessions/` dir is always empty; OpenClaw does not write JSONL session files |
+| Sessions | **SQLite only** (`memory/main.sqlite`) | OpenClaw does not write JSONL session files |
 
-The `IRONCLAW_ROOT` env var inside the container defaults to `/home/ai_sandbox/.openclaw`. The `agents/main/` subdirectory exists but its `config/`, `logs/`, and `sessions/` subdirs are empty — OpenClaw uses the root-level paths above.
+Skill scripts should use paths relative to the workspace (e.g. `workspace/skills/<name>/scripts/...`) or the OpenClaw home; avoid hard-coding the home directory path so the repo stays portable.
 
 ## Creating a New Agent
 
@@ -355,11 +354,11 @@ These rules use enforcement language ("MANDATORY", "FORBIDDEN", forbidden phrase
 
 See `docs/TOOLS-AND-SKILLS.md` for the full tool/skill reference and `docs/MODEL-CHOICE.md` for model selection guidance.
 
-## Resource Budget (32GB Mac)
+## Resource budget (example: 32GB host)
 
-| Agents | RAM Each | Total RAM | Notes |
+| Agents | RAM each | Total RAM | Notes |
 |--------|----------|-----------|-------|
-| 2 (e.g. sample-agent + mybot) | 4g + 4g | 8g | Example setup |
+| 2 (e.g. sample-agent + mybot) | 4g + 4g | 8g | Typical |
 | 3 | 8g + 4g + 4g | 16g | Comfortable |
-| 6 | 4g each | 24g | Leaves 8g for host + Ollama |
+| 6 | 4g each | 24g | Leaves headroom for host + Ollama |
 | 8+ | 2-3g each | 20-24g | Lightweight agents |

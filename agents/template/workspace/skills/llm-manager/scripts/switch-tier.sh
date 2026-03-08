@@ -10,7 +10,7 @@ TIER="$1"
 TASK="${2:-primary}"
 REASON="${3:-User/Agent requested switch}"
 
-AGENT_DIR="/home/ai_sandbox/.openclaw"
+AGENT_DIR="/home/openclaw/.openclaw"
 CONFIG_FILE="$AGENT_DIR/openclaw.json"
 TIERS_FILE="$AGENT_DIR/workspace/skills/llm-manager/tiers.json"
 LOG_FILE="/tmp/openclaw/model_switches.log"

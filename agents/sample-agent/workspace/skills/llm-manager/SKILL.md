@@ -35,17 +35,17 @@ You are an expert model orchestrator. You can swap your own underlying LLM provi
 Update your primary model or a specific task model (heartbeat/report) to a new tier.
 
 **Command:**
-`exec: bash /home/ai_sandbox/.openclaw/workspace/skills/llm-manager/scripts/switch-tier.sh <tier> [task_type] "[reason]"`
+`exec: bash /home/openclaw/.openclaw/workspace/skills/llm-manager/scripts/switch-tier.sh <tier> [task_type] "[reason]"`
 
 - **tier**: `flagship`, `worker`, `efficiency`, `reasoning`, `coding`
 - **task_type**: `primary` (default), `heartbeat`, `report`
 - **reason**: Why you are switching (this shows up in admin logs).
 
 **Example:**
-`exec: bash /home/ai_sandbox/.openclaw/workspace/skills/llm-manager/scripts/switch-tier.sh flagship primary "Upgrading for complex architectural analysis"`
+`exec: bash /home/openclaw/.openclaw/workspace/skills/llm-manager/scripts/switch-tier.sh flagship primary "Upgrading for complex architectural analysis"`
 
 **Example (downgrading heartbeats to save cost):**
-`exec: bash /home/ai_sandbox/.openclaw/workspace/skills/llm-manager/scripts/switch-tier.sh efficiency heartbeat "Saving cost on idle checks"`
+`exec: bash /home/openclaw/.openclaw/workspace/skills/llm-manager/scripts/switch-tier.sh efficiency heartbeat "Saving cost on idle checks"`
 
 ## Logging
 

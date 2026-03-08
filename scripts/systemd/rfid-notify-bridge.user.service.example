@@ -8,6 +8,6 @@ Description=RFID notify bridge (one-shot, called by timer)
 
 [Service]
 Type=oneshot
-WorkingDirectory=/home/kosar/ironclaw
-EnvironmentFile=/home/kosar/ironclaw/agents/pibot/.env
-ExecStart=/usr/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/rfid/rfid_notify_bridge.py
+WorkingDirectory=/path/to/ironclaw
+EnvironmentFile=/path/to/ironclaw/agents/AGENT_NAME/.env
+ExecStart=/usr/bin/python3 /path/to/ironclaw/agents/AGENT_NAME/workspace/rfid/rfid_notify_bridge.py

@@ -457,7 +457,7 @@ do_compose_up() {
     local cid
     cid="$(docker_cmd ps -q -f "name=${AGENT_NAME}" 2>/dev/null | head -1)"
     if [[ -n "$cid" ]]; then
-      (timeout 25 docker_cmd exec "$cid" sh -c 'export PATH="/home/ai_sandbox/.npm-global/bin:$PATH"; echo y | openclaw doctor --fix 2>/dev/null' 2>/dev/null) || true
+      (timeout 25 docker_cmd exec "$cid" sh -c 'export PATH="/home/openclaw/.npm-global/bin:$PATH"; echo y | openclaw doctor --fix 2>/dev/null' 2>/dev/null) || true
       run_sudo chown -R 1000:1000 "$IRONCLAW_ROOT/agents/$AGENT_NAME/config-runtime" 2>/dev/null || true
       (cd "$IRONCLAW_ROOT" && docker_cmd compose -p "$AGENT_NAME" restart 2>/dev/null) || true
       log_ok "Doctor run and container restarted; Step 8 will re-test the gateway."

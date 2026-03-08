@@ -14,7 +14,7 @@ When the user sends a photo with a message like "what's in this?" or "describe t
 
 ```json
 {
-  "command": "bash /home/ai_sandbox/.openclaw/workspace/skills/image-vision/scripts/describe-image.sh \"<path-to-image>\" \"<optional-question>\"",
+  "command": "bash /home/openclaw/.openclaw/workspace/skills/image-vision/scripts/describe-image.sh \"<path-to-image>\" \"<optional-question>\"",
   "timeout": 150
 }
 ```

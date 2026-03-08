@@ -2,7 +2,8 @@
 # Copy to: ~/.config/systemd/user/piglow-log-bridge.service
 # Then: systemctl --user daemon-reload && systemctl --user enable piglow-log-bridge.service && systemctl --user start piglow-log-bridge.service
 # Logs: journalctl --user -u piglow-log-bridge.service -f
-# Requires: PiGlow service running (piglow-service.service), jq, pibot logs at agents/pibot/logs/
+# Requires: PiGlow service running (piglow-service.service), jq, agent logs at agents/AGENT_NAME/logs/
+# Edit WorkingDirectory and the script argument to your repo path and agent name.
 
 [Unit]
 Description=PiGlow log bridge for pibot (activity on run start/done)
@@ -11,8 +12,8 @@ Wants=piglow-service.service
 
 [Service]
 Type=simple
-WorkingDirectory=/home/kosar/ironclaw
-ExecStart=/home/kosar/ironclaw/scripts/piglow-log-bridge.sh pibot
+WorkingDirectory=/path/to/ironclaw
+ExecStart=/path/to/ironclaw/scripts/piglow-log-bridge.sh AGENT_NAME
 Restart=on-failure
 RestartSec=10
 

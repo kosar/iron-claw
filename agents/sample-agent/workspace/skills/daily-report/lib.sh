@@ -5,7 +5,7 @@ set -uo pipefail
 
 # IronClaw root detection
 IRONCLAW_ROOT="${IRONCLAW_ROOT:-$HOME/.openclaw}"
-[[ -d "$IRONCLAW_ROOT" ]] || IRONCLAW_ROOT="/home/ai_sandbox/.openclaw"
+[[ -d "$IRONCLAW_ROOT" ]] || IRONCLAW_ROOT="/home/openclaw/.openclaw"
 
 # Agent resolution
 AGENT_NAME=""

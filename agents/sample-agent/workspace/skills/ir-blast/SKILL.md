@@ -31,7 +31,7 @@ The USB IR blaster must be on the same machine; if the agent runs in Docker, pas
 Run the list script to see remotes and buttons:
 
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/ir-blast/scripts/list_remotes.py
+exec: python3 /home/openclaw/.openclaw/workspace/skills/ir-blast/scripts/list_remotes.py
 ```
 
 Use the output to answer "what can I control?" and to choose the correct **remote** and **button** names for Step 2. If the script prints nothing or says no remotes, reply that no IR buttons have been learned yet and suggest running `./scripts/ir-learn.py` on the Pi.
@@ -41,13 +41,13 @@ Use the output to answer "what can I control?" and to choose the correct **remot
 Run the emit script with **remote name** and **button name** (exactly as in the catalog):
 
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/ir-blast/scripts/emit.py <remote> <button>
+exec: python3 /home/openclaw/.openclaw/workspace/skills/ir-blast/scripts/emit.py <remote> <button>
 ```
 
 Example: to send the power button for the fan remote:
 
 ```
-exec: python3 /home/ai_sandbox/.openclaw/workspace/skills/ir-blast/scripts/emit.py fanremote2 power
+exec: python3 /home/openclaw/.openclaw/workspace/skills/ir-blast/scripts/emit.py fanremote2 power
 ```
 
 - **remote** and **button** must match the names used when learning (e.g. from REMOTES.md). Use lowercase with underscores (e.g. `fan_remote`, `speed_1`).

@@ -5,10 +5,10 @@
 echo "Setting up ProductWatcher cron job..."
 
 # Create log directory
-mkdir -p /home/ai_sandbox/.openclaw/workspace/skills/productwatcher/watcher_vault/logs
+mkdir -p /home/openclaw/.openclaw/workspace/skills/productwatcher/watcher_vault/logs
 
 # Add to crontab (runs every hour)
-CRON_LINE="0 * * * * cd /home/ai_sandbox/.openclaw/workspace/skills/productwatcher && /usr/bin/python3 scripts/watcher_engine.py >> watcher_vault/logs/cron-\$(date +\%Y\%m\%d).log 2>&1"
+CRON_LINE="0 * * * * cd /home/openclaw/.openclaw/workspace/skills/productwatcher && /usr/bin/python3 scripts/watcher_engine.py >> watcher_vault/logs/cron-\$(date +\%Y\%m\%d).log 2>&1"
 
 # Check if already exists
 if crontab -l 2>/dev/null | grep -q "watcher_engine.py"; then

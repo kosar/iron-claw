@@ -1,17 +1,18 @@
-# PiGlow signal service for pibot — user systemd (runs on Pi host)
+# PiGlow signal service — user systemd (runs on Pi host)
 # Copy to: ~/.config/systemd/user/piglow-service.service
 # Then: systemctl --user daemon-reload && systemctl --user enable piglow-service.service && systemctl --user start piglow-service.service
 # Logs: journalctl --user -u piglow-service.service -f
 # Port 18793; override with: Environment=PIGLOW_PORT=18793 in [Service]
+# Edit /path/to/ironclaw and AGENT_NAME to your repo path and agent (e.g. /home/pi/ironclaw, sample-agent).
 
 [Unit]
-Description=PiGlow signal service for pibot (port 18793)
+Description=PiGlow signal service (port 18793)
 After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/kosar/ironclaw
-ExecStart=/usr/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/piglow/piglow_service.py
+WorkingDirectory=/path/to/ironclaw
+ExecStart=/usr/bin/python3 /path/to/ironclaw/agents/AGENT_NAME/workspace/piglow/piglow_service.py
 Restart=on-failure
 RestartSec=5
 

@@ -10,9 +10,9 @@ After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/kosar/ironclaw
-EnvironmentFile=/home/kosar/ironclaw/agents/pibot/.env
-ExecStart=/home/kosar/ironclaw/agents/pibot/workspace/rfid/.venv/bin/python3 /home/kosar/ironclaw/agents/pibot/workspace/rfid/rfid_daemon.py
+WorkingDirectory=/path/to/ironclaw
+EnvironmentFile=/path/to/ironclaw/agents/AGENT_NAME/.env
+ExecStart=/path/to/ironclaw/agents/AGENT_NAME/workspace/rfid/.venv/bin/python3 /path/to/ironclaw/agents/AGENT_NAME/workspace/rfid/rfid_daemon.py
 Restart=on-failure
 RestartSec=5
 
