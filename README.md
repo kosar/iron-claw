@@ -1,4 +1,4 @@
-# IronClaw Core — Hardened Multi-Agent Factory on OpenClaw
+# IronClaw Core: Hardened Multi-Agent Factory on OpenClaw
 
 IronClaw Core is a factory for deploying hardened OpenClaw agent instances in Docker. Each agent is a full OpenClaw gateway with its own personality, skills, channels, secrets, and resource limits, sharing one locked-down image and a single operational toolchain.
 
@@ -21,9 +21,9 @@ cp agents/template/.env.example agents/sample-agent/.env
 
 Edit `agents/sample-agent/.env` and set at least:
 
-- **OPENCLAW_GATEWAY_TOKEN** — e.g. `openssl rand -hex 24`
-- **OPENCLAW_OWNER_DISPLAY_SECRET** — any secret value (required by OpenClaw)
-- **OPENAI_API_KEY** — your OpenAI API key (or use Ollama-only in config)
+- **OPENCLAW_GATEWAY_TOKEN**: e.g. `openssl rand -hex 24`
+- **OPENCLAW_OWNER_DISPLAY_SECRET**: any secret value (required by OpenClaw)
+- **OPENAI_API_KEY**: your OpenAI API key (or use Ollama-only in config)
 
 ```bash
 # 4. Start the sample agent
@@ -43,12 +43,12 @@ You should see a JSON response (e.g. `"content":"sample-agent is working."`). Ne
 
 **IronClaw** adds what OpenClaw leaves to the operator:
 
-- **Containerization and isolation** — One compose project per agent; each gets its own network namespace, port, and volumes.
-- **Security hardening** — Read-only filesystem (only mounted volumes are writable), all capabilities dropped, `no-new-privileges`, non-root (UID 1000). The gateway binds inside the container; host-side port mapping restricts who can reach it (e.g. `127.0.0.1:18789` only).
-- **Config discipline** — The host holds the source config in `config/`; the container never writes there. `compose-up.sh` syncs `config/` into `config-runtime/` and the container mounts only `config-runtime/`. So a bad run cannot corrupt the canonical config; the next start resyncs from a clean copy. (See [Separation, Boundaries, and Execution](#separation-boundaries-and-execution-the-ironclaw-model) for the full picture of how config, runtime, exec, and workspace fit together.)
-- **Operational scripts** — Log analysis, cost tracking, session pruning, failure detection, session healing (e.g. stripping reasoning items that break replay), gateway health checks. All take the agent name as the first argument and use `lib.sh` for paths and `agent.conf` values.
-- **Built-in post-run learning loop** — Every completed run (`embedded run done`) can be scored for reliability/efficiency/hygiene, logged to owner-only feedback files, and optionally sent to the owner/configurator by email. This is internal-only and never shown to end users.
-- **Factory model** — A single template under `agents/template/`; new agents are created with `create-agent.sh`, which copies the template, assigns a port, and writes `agent.conf`. Every agent starts from full OpenClaw defaults; customization is additive (personality, skills, channels, limits).
+- **Containerization and isolation**: One compose project per agent; each gets its own network namespace, port, and volumes.
+- **Security hardening**: Read-only filesystem (only mounted volumes are writable), all capabilities dropped, `no-new-privileges`, non-root (UID 1000). The gateway binds inside the container; host-side port mapping restricts who can reach it (e.g. `127.0.0.1:18789` only).
+- **Config discipline**: The host holds the source config in `config/`; the container never writes there. `compose-up.sh` syncs `config/` into `config-runtime/` and the container mounts only `config-runtime/`. So a bad run cannot corrupt the canonical config; the next start resyncs from a clean copy. (See [Separation, Boundaries, and Execution](#separation-boundaries-and-execution-the-ironclaw-model) for the full picture of how config, runtime, exec, and workspace fit together.)
+- **Operational scripts**: Log analysis, cost tracking, session pruning, failure detection, session healing (e.g. stripping reasoning items that break replay), gateway health checks. All take the agent name as the first argument and use `lib.sh` for paths and `agent.conf` values.
+- **Built-in post-run learning loop**: Every completed run (`embedded run done`) can be scored for reliability/efficiency/hygiene, logged to owner-only feedback files, and optionally sent to the owner/configurator by email. This is internal-only and never shown to end users.
+- **Factory model**: A single template under `agents/template/`; new agents are created with `create-agent.sh`, which copies the template, assigns a port, and writes `agent.conf`. Every agent starts from full OpenClaw defaults; customization is additive (personality, skills, channels, limits).
 
 OpenClaw is not updated from inside the container. The image is built from the official installer (`openclaw.ai/install.sh`) at **build** time; the filesystem is read-only and there is no in-container upgrade path. Upgrading the gateway means rebuilding the image and redeploying. In practice we track upstream, watch for divergences, and adopt new versions deliberately rather than automatically.
 
@@ -58,11 +58,11 @@ OpenClaw is not updated from inside the container. The image is built from the o
 
 Rough pipeline:
 
-1. **Upstream** — An official OpenClaw release (install script, npm package, behavior).
-2. **Image** — Dockerfile installs Node, system deps (Chromium, ffmpeg, ripgrep, python3), renames the node user to `ai_sandbox`, runs the install script as that user, and sets `CMD ["openclaw", "gateway"]`. You build with `docker build -t ironclaw:2.0 .` (or the tag your compose template expects). Same Dockerfile on Mac and Pi; build on the machine (or arch) you will run on.
-3. **Agent scaffold** — `./scripts/create-agent.sh <name> [admin-email]` creates `agents/<name>/` from the template, assigns the next free port, and creates `agent.conf` and `.env` from examples. You then fill in secrets and optionally tune `agent.conf` (RAM, CPUs, SHM).
-4. **Config and safety** — Edit only `config/` and `workspace/` on the host. Before every start, `compose-up.sh` syncs config, injects port and (for agents with HARDWARE_PROFILE=pi) LAN-discovered Ollama host, runs session pruning and session healing (so broken reasoning state does not cause 400s on replay), and generates `docker-compose.yml` from the template via `envsubst`. So the container always starts from a prepared, consistent state.
-5. **Start** — `./scripts/compose-up.sh <name> -d` runs the sync steps above and then `docker compose -p <name> up -d`. The agent’s “powers” (tools, skills, channels) are whatever you enabled in config and workspace; onboarding is methodical (e.g. TODO.md in workspace, heartbeat-driven setup) rather than all-at-once.
+1. **Upstream**: An official OpenClaw release (install script, npm package, behavior).
+2. **Image**: Dockerfile installs Node, system deps (Chromium, ffmpeg, ripgrep, python3), renames the node user to `ai_sandbox`, runs the install script as that user, and sets `CMD ["openclaw", "gateway"]`. You build with `docker build -t ironclaw:2.0 .` (or the tag your compose template expects). Same Dockerfile on Mac and Pi; build on the machine (or arch) you will run on.
+3. **Agent scaffold**: `./scripts/create-agent.sh <name> [admin-email]` creates `agents/<name>/` from the template, assigns the next free port, and creates `agent.conf` and `.env` from examples. You then fill in secrets and optionally tune `agent.conf` (RAM, CPUs, SHM).
+4. **Config and safety**: Edit only `config/` and `workspace/` on the host. Before every start, `compose-up.sh` syncs config, injects port and (for agents with HARDWARE_PROFILE=pi) LAN-discovered Ollama host, runs session pruning and session healing (so broken reasoning state does not cause 400s on replay), and generates `docker-compose.yml` from the template via `envsubst`. So the container always starts from a prepared, consistent state.
+5. **Start**: `./scripts/compose-up.sh <name> -d` runs the sync steps above and then `docker compose -p <name> up -d`. The agent’s “powers” (tools, skills, channels) are whatever you enabled in config and workspace; onboarding is methodical (e.g. TODO.md in workspace, heartbeat-driven setup) rather than all-at-once.
 
 So: **raw OpenClaw → IronClaw image and scripts → hardened, controlled container → agent brought up gradually with clear config and limits.**
 
@@ -72,9 +72,9 @@ So: **raw OpenClaw → IronClaw image and scripts → hardened, controlled conta
 
 The original design leaned heavily on “run locally” (e.g. Ollama on the host). That has shifted. Today the stack is:
 
-- **Multiple online providers** — OpenAI, Moonshot (Kimi), and others are configured per agent. Primary and fallback models are chosen per use case (e.g. heartbeat vs. chat).
-- **Heavy work** — The most capable or expensive work often runs on paid APIs; what can be done quickly and well locally is still offloaded when it makes sense.
-- **“Local” now means LAN** — The host that runs the container is on a local area network. We do **not** assume Ollama is on the same machine. We assume there may be Ollama servers elsewhere on the LAN (ports open, IPs reachable). The host runs a **LAN scan** (e.g. `scripts/discover-ollama.sh`) to find those hosts and optionally pass one in as `OLLAMA_HOST` for the container. Inside the container, `SCAN_SUBNET` is set from the host’s subnet so skills (e.g. image-gen) can also discover Ollama on the LAN and use those models without API keys. So “local” is “on the same network,” not “on the same box,” and we still get frugality where it matters — models on the LAN are used when available — without making that the center of the design.
+- **Multiple online providers**: OpenAI, Moonshot (Kimi), and others are configured per agent. Primary and fallback models are chosen per use case (e.g. heartbeat vs. chat).
+- **Heavy work**: The most capable or expensive work often runs on paid APIs; what can be done quickly and well locally is still offloaded when it makes sense.
+- **“Local” now means LAN**: The host that runs the container is on a local area network. We do **not** assume Ollama is on the same machine. We assume there may be Ollama servers elsewhere on the LAN (ports open, IPs reachable). The host runs a **LAN scan** (e.g. `scripts/discover-ollama.sh`) to find those hosts and optionally pass one in as `OLLAMA_HOST` for the container. Inside the container, `SCAN_SUBNET` is set from the host’s subnet so skills (e.g. image-gen) can also discover Ollama on the LAN and use those models without API keys. So “local” is “on the same network,” not “on the same box,” and we still get frugality where it matters (models on the LAN are used when available) without making that the center of the design.
 
 Example: for agents with **HARDWARE_PROFILE=pi** (e.g. on a Raspberry Pi), `compose-up.sh` runs `discover-ollama.sh` before starting; if an Ollama host is found on the LAN (other than localhost / host.docker.internal), it is set as `OLLAMA_HOST` so the container can use it. On a Mac, `host.docker.internal` is typically used so the container talks to Ollama on the host. In both cases the container receives `SCAN_SUBNET` so any in-container logic that scans for Ollama (e.g. in skills) sees the same network.
 
@@ -107,23 +107,23 @@ This section explains how IronClaw achieves the separation we care about: **immu
 
 ### What we’re separating
 
-1. **Source of truth vs. runtime state** — The host holds the canonical config and workspace; the container never writes to them. Runtime state (sessions, memory, container-written files) lives in `config-runtime/`, which is repopulated from `config/` on every start (with exclusions so we don’t lose sessions). So a bad run or a bug cannot corrupt “what you intended”; the next `compose-up` resyncs from a clean copy.
-2. **Who can do what** — The container is the single security boundary. It’s locked down (read-only filesystem except mounts, no capabilities, non-root, resource limits). Everything the agent does — tools, exec, skills — happens inside that boundary. We do **not** give the container Docker or the host’s Docker socket; we don’t run “Docker inside the container” for extra isolation. The container *is* the isolation.
-3. **Where exec runs** — OpenClaw’s **exec** tool can run commands in different places: **gateway** (same process as the gateway), **node** (a separate node host), or **sandbox**. In OpenClaw’s design, **sandbox** means “run the command in a separate Docker container” for isolation. That requires the `docker` binary and a Docker daemon. Our agent containers don’t have Docker inside them — they *are* the container. So if we set `host=sandbox`, OpenClaw tries to spawn another container and fails (`spawn docker ENOENT`). The fix is to run exec in the **gateway** context: the command runs in the same container as the gateway. We still get one clear boundary (the container); we just don’t add a second layer of containers inside it.
+1. **Source of truth vs. runtime state**: The host holds the canonical config and workspace; the container never writes to them. Runtime state (sessions, memory, container-written files) lives in `config-runtime/`, which is repopulated from `config/` on every start (with exclusions so we don’t lose sessions). So a bad run or a bug cannot corrupt “what you intended”; the next `compose-up` resyncs from a clean copy.
+2. **Who can do what**: The container is the single security boundary. It’s locked down (read-only filesystem except mounts, no capabilities, non-root, resource limits). Everything the agent does (tools, exec, skills) happens inside that boundary. We do **not** give the container Docker or the host’s Docker socket; we don’t run “Docker inside the container” for extra isolation. The container *is* the isolation.
+3. **Where exec runs**: OpenClaw’s **exec** tool can run commands in different places: **gateway** (same process as the gateway), **node** (a separate node host), or **sandbox**. In OpenClaw’s design, **sandbox** means “run the command in a separate Docker container” for isolation. That requires the `docker` binary and a Docker daemon. Our agent containers don’t have Docker inside them: they *are* the container. So if we set `host=sandbox`, OpenClaw tries to spawn another container and fails (`spawn docker ENOENT`). The fix is to run exec in the **gateway** context: the command runs in the same container as the gateway. We still get one clear boundary (the container); we just don’t add a second layer of containers inside it.
 
 ### Why gateway exec (not sandbox) for agents in Docker
 
 - **Sandbox** in OpenClaw = “run in a separate Docker container.” So sandbox requires Docker to be available where the gateway runs. Inside our hardened container there is no Docker, so sandbox is unavailable.
-- **Gateway** = “run in the gateway’s environment.” When the gateway runs inside our container, that environment *is* the container. So exec runs there — same filesystem, same network, same env. No extra privilege, no Docker-in-Docker, no socket mount.
-- We **could** install Docker in the container or mount the host’s Docker socket so OpenClaw could spawn sandbox containers. That would mean the container (or the gateway) can create containers on the host, which is a much larger trust and operational burden. For our use case — controlled skills, allowlisted exec, single-tenant agents — the container is already the right boundary. Gateway exec is the right choice.
+- **Gateway** = “run in the gateway’s environment.” When the gateway runs inside our container, that environment *is* the container. So exec runs there: same filesystem, same network, same env. No extra privilege, no Docker-in-Docker, no socket mount.
+- We **could** install Docker in the container or mount the host’s Docker socket so OpenClaw could spawn sandbox containers. That would mean the container (or the gateway) can create containers on the host, which is a much larger trust and operational burden. For our use case (controlled skills, allowlisted exec, single-tenant agents) the container is already the right boundary. Gateway exec is the right choice.
 
 **Per-agent behavior:** For any agent that runs where **Docker is not available inside the container** (e.g. Raspberry Pi, or when you do not want OpenClaw to spawn sandbox containers), set `EXEC_HOST=gateway` in that agent’s `agent.conf`. Then `compose-up.sh` injects `agents.defaults.sandbox.mode: "off"` and `tools.exec.host: "gateway"` so exec runs in the same container as the gateway. For other agents (e.g. on a Mac where sandbox might be used later), the script injects `host: "sandbox"`. The source of truth is `agent.conf`; the container never “remembers” the wrong value across restarts.
 
-**Why this matters for limited-hardware or “no Docker-in-container” agents:** On a Raspberry Pi (or any host where the agent container has no Docker inside it), the agent often needs to reach **services on the host** — e.g. PiGlow, PiFace, IR blaster, camera, log bridge — via HTTP (`host.docker.internal`) or device passthrough. Exec must run **in the gateway** so those scripts and tools actually run. If exec were set to sandbox, OpenClaw would try to run commands in a separate Docker container that we do not provide, and exec would be blocked. We encode the policy in the repo: such agents set `EXEC_HOST=gateway` in `agent.conf`. On every `compose-up`, the script injects the correct `tools.exec.host` and `agents.defaults.sandbox.mode`. Full Raspberry Pi setup (PiGlow, IR, RFID, camera, Telegram) is in [docs/RECREATING-PIBOT.md](docs/RECREATING-PIBOT.md) and [docs/RASPBERRY-PI-RUNBOOK.md](docs/RASPBERRY-PI-RUNBOOK.md).
+**Why this matters for limited-hardware or “no Docker-in-container” agents:** On a Raspberry Pi (or any host where the agent container has no Docker inside it), the agent often needs to reach **services on the host** (e.g. PiGlow, PiFace, IR blaster, camera, log bridge) via HTTP (`host.docker.internal`) or device passthrough. Exec must run **in the gateway** so those scripts and tools actually run. If exec were set to sandbox, OpenClaw would try to run commands in a separate Docker container that we do not provide, and exec would be blocked. We encode the policy in the repo: such agents set `EXEC_HOST=gateway` in `agent.conf`. On every `compose-up`, the script injects the correct `tools.exec.host` and `agents.defaults.sandbox.mode`. Full Raspberry Pi setup (PiGlow, IR, RFID, camera, Telegram) is in [docs/RECREATING-PIBOT.md](docs/RECREATING-PIBOT.md) and [docs/RASPBERRY-PI-RUNBOOK.md](docs/RASPBERRY-PI-RUNBOOK.md).
 
 ### Workspace and file paths: one shared view
 
-Tools like **write** and **exec** both run inside the same container, but they must agree on where files live. If the agent uses **write** to create a file in `/tmp` and then passes that path to **exec**, the exec might not see the same `/tmp` (e.g. if OpenClaw had used a sandbox with a different filesystem view). We avoid that class of bug with a single rule: **any file the agent creates and then passes to exec (or between execs) must live under the workspace** — i.e. under `/home/ai_sandbox/.openclaw/workspace/...`, which is the mounted host `workspace/` directory. Both the write tool and exec see the same mount, so the path is valid for both. Skills are written to assume workspace paths (e.g. body file for send-email, generated image path for image-gen). We document this as Rule 6b in agent guidelines so the model doesn’t use `/tmp` for cross-tool files.
+Tools like **write** and **exec** both run inside the same container, but they must agree on where files live. If the agent uses **write** to create a file in `/tmp` and then passes that path to **exec**, the exec might not see the same `/tmp` (e.g. if OpenClaw had used a sandbox with a different filesystem view). We avoid that class of bug with a single rule: **any file the agent creates and then passes to exec (or between execs) must live under the workspace**, i.e. under `/home/ai_sandbox/.openclaw/workspace/...`, which is the mounted host `workspace/` directory. Both the write tool and exec see the same mount, so the path is valid for both. Skills are written to assume workspace paths (e.g. body file for send-email, generated image path for image-gen). We document this as Rule 6b in agent guidelines so the model doesn’t use `/tmp` for cross-tool files.
 
 ### Credentials and exec: getting secrets where they’re needed
 
@@ -198,13 +198,13 @@ Host `workspace/AGENTS.md` is prepended into `config-runtime/workspace/AGENTS.md
 
 ## Security Hardening (Same for Every Agent)
 
-- **Read-only filesystem** — Writable only where volumes are mounted.
-- **Capabilities** — All dropped (`cap_drop: [ALL]`).
-- **Privilege escalation** — Disabled (`no-new-privileges: true`).
-- **User** — `1000:1000` (ai_sandbox), not root.
-- **Port** — Bound inside the container; host mapping (e.g. `127.0.0.1:${AGENT_PORT}:${AGENT_PORT}`) limits who can connect.
-- **Init** — Tini reaps zombies (e.g. from Chromium).
-- **Resources** — `mem_limit`, `cpus`, `shm_size` from `agent.conf`.
+- **Read-only filesystem**: Writable only where volumes are mounted.
+- **Capabilities**: All dropped (`cap_drop: [ALL]`).
+- **Privilege escalation**: Disabled (`no-new-privileges: true`).
+- **User**: `1000:1000` (ai_sandbox), not root.
+- **Port**: Bound inside the container; host mapping (e.g. `127.0.0.1:${AGENT_PORT}:${AGENT_PORT}`) limits who can connect.
+- **Init**: Tini reaps zombies (e.g. from Chromium).
+- **Resources**: `mem_limit`, `cpus`, `shm_size` from `agent.conf`.
 
 This follows standard containment practice: assume the payload might be coerced or misused, and limit blast radius with layers (filesystem, capabilities, user, network, resources).
 
@@ -258,13 +258,13 @@ The container never writes to `config/`; it only sees `config-runtime/`, which i
 
 ## Channels: Telegram, WhatsApp, Email
 
-The three channels that work best for users are **Telegram**, **WhatsApp**, and **email**. We do not recommend iMessage for now: it requires a Mac running BlueBubbles (Messages.app bridge, Private API, webhooks), a specific Apple ID and permissions setup, and we have not yet optimized or hardened that path. The following is a high-level view of how each of the three works and how pairing or allowlisting is done — no secrets, just mechanics.
+The three channels that work best for users are **Telegram**, **WhatsApp**, and **email**. We do not recommend iMessage for now: it requires a Mac running BlueBubbles (Messages.app bridge, Private API, webhooks), a specific Apple ID and permissions setup, and we have not yet optimized or hardened that path. The following is a high-level view of how each of the three works and how pairing or allowlisting is done (no secrets, just mechanics).
 
 ### Telegram
 
 **How it works:** OpenClaw runs a Telegram **bot**. You create the bot with Telegram’s BotFather and get a bot token. The gateway uses that token to poll (or receive webhooks) for new messages. When a user sends a message to the bot, OpenClaw gets the update, runs the agent, and sends the reply as the bot. All traffic is between the gateway and Telegram’s API; Telegram handles delivery to the user’s app.
 
-**Pairing / allowlist:** Telegram identifies users by a **numeric user ID** (not username). By default we use an allowlist: only IDs in `allowFrom` in `config/openclaw.json` can talk to the bot. So “pairing” is: (1) the user messages the bot or uses a helper bot to learn their numeric ID, (2) you add that ID to `allowFrom`, (3) restart or resync so the config is loaded. No shared secret with the user; the gate is “only these IDs.” You can also use a pairing flow where new users get a one-time code and you approve them before adding to the allowlist — that’s a policy choice in config (`dmPolicy`, `groupPolicy`).
+**Pairing / allowlist:** Telegram identifies users by a **numeric user ID** (not username). By default we use an allowlist: only IDs in `allowFrom` in `config/openclaw.json` can talk to the bot. So “pairing” is: (1) the user messages the bot or uses a helper bot to learn their numeric ID, (2) you add that ID to `allowFrom`, (3) restart or resync so the config is loaded. No shared secret with the user; the gate is “only these IDs.” You can also use a pairing flow where new users get a one-time code and you approve them before adding to the allowlist; that’s a policy choice in config (`dmPolicy`, `groupPolicy`).
 
 **Why it’s reliable:** Single well-documented API, webhooks or long polling, no extra host process. The container only needs outbound HTTPS to Telegram. Works the same on Mac, Pi, or any host.
 
@@ -347,9 +347,9 @@ LEARNING_FEEDBACK_DISABLE_LLM_JUDGE=false
 
 ## Model Stack (Typical)
 
-- **Primary** — e.g. `openai/gpt-5-mini` or `moonshot/kimi-k2.5` depending on agent; reasoning and context as needed.
-- **Heartbeat** — Lighter model (e.g. `gpt-5-nano`) for periodic memory maintenance.
-- **Fallback** — Often `ollama/qwen3:8b` or similar, with base URL pointing at `OLLAMA_HOST` (host or LAN-discovered). Failover on auth/rate-limit/timeout, not on connection refused.
+- **Primary**: e.g. `openai/gpt-5-mini` or `moonshot/kimi-k2.5` depending on agent; reasoning and context as needed.
+- **Heartbeat**: Lighter model (e.g. `gpt-5-nano`) for periodic memory maintenance.
+- **Fallback**: Often `ollama/qwen3:8b` or similar, with base URL pointing at `OLLAMA_HOST` (host or LAN-discovered). Failover on auth/rate-limit/timeout, not on connection refused.
 
 Ollama base URL in config can use `http://host.docker.internal:11434` or a LAN IP set at compose-up. Skills that need to find Ollama on the LAN use `SCAN_SUBNET` and their own discovery (e.g. image-gen’s `discover-ollama.sh`).
 
@@ -373,10 +373,10 @@ On a 32GB Mac you can run several agents (e.g. 4g each). On a Pi, one agent at 2
 
 ## Known Issues
 
-- **Permission denied** — Containers run as UID 1000; ensure agent dirs (config-runtime, workspace, logs) are writable by that user. On Pi, if you run compose-up with sudo, the script chowns config-runtime for agents with HARDWARE_PROFILE=pi so the container can read it.
-- **Ollama unreachable** — Ensure Ollama listens on the expected interface (e.g. `0.0.0.0` on the host for host.docker.internal). For LAN use, ensure the discovered host and port are reachable from the host that runs the container.
-- **Gateway won’t start with bind: lan** — If OpenClaw requires a Control UI setting for non-loopback binding, add `"controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true }` in the gateway section of `openclaw.json` (see `docs/RASPBERRY-PI-RUNBOOK.md`).
-- **Crash loop** — Often a JSON or config error in `openclaw.json`; fix and restart.
-- **Port conflict** — Each agent needs a unique port; `create-agent.sh` assigns the next free one; confirm with `list-agents.sh`.
+- **Permission denied**: Containers run as UID 1000; ensure agent dirs (config-runtime, workspace, logs) are writable by that user. On Pi, if you run compose-up with sudo, the script chowns config-runtime for agents with HARDWARE_PROFILE=pi so the container can read it.
+- **Ollama unreachable**: Ensure Ollama listens on the expected interface (e.g. `0.0.0.0` on the host for host.docker.internal). For LAN use, ensure the discovered host and port are reachable from the host that runs the container.
+- **Gateway won’t start with bind: lan**: If OpenClaw requires a Control UI setting for non-loopback binding, add `"controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true }` in the gateway section of `openclaw.json` (see `docs/RASPBERRY-PI-RUNBOOK.md`).
+- **Crash loop**: Often a JSON or config error in `openclaw.json`; fix and restart.
+- **Port conflict**: Each agent needs a unique port; `create-agent.sh` assigns the next free one; confirm with `list-agents.sh`.
 
 We are still in an experimental phase; behavior and layout may evolve as we iterate.
