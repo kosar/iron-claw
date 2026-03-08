@@ -162,7 +162,7 @@ On detached start, `learning-log-bridge.sh` runs unless `IRONCLAW_DISABLE_LEARNI
 
 Out of the box, IronClaw does **not** enable the optional OpenClaw features that add heavy autonomous or multi-step behavior. The agent runs in a request-response style: it handles one conversation turn at a time. The only background behavior we configure is a lightweight **heartbeat** (e.g. every 2h) for memory maintenance. We do **not** enable **Lobster** (OpenClaw’s workflow engine for multi-step tool pipelines and approval-gated subprocesses), and we do **not** configure **nodes** or **canvas** (paired devices and display UI). So you don’t get workflow subprocesses, orchestrated pipelines, or device pairing by default; that keeps the system predictable and avoids surprising side effects when you first run an agent. If you need Lobster, richer subagent orchestration, or nodes/canvas, you can add them yourself in `config/openclaw.json` (e.g. `tools.alsoAllow`, subagent settings) and in OpenClaw’s docs; we leave that to you once your requirements call for it.
 
-## Background and concepts (optional)
+## Frequently Asked Questions
 
 ### What is OpenClaw?
 
