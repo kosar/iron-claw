@@ -115,21 +115,15 @@ if command -v jq >/dev/null 2>&1; then
   ' "$CONFIG_RUNTIME/openclaw.json" > "$tmp_json" && mv "$tmp_json" "$CONFIG_RUNTIME/openclaw.json"
 fi
 
-# When compose-up is run with sudo (e.g. on Raspberry Pi), container (uid 1000) needs config readable.
-if [[ "${HARDWARE_PROFILE:-}" == "pi" ]] && [[ -d "$CONFIG_RUNTIME" ]] && [[ $(id -u) -eq 0 ]]; then
-  chown -R 1000:1000 "$CONFIG_RUNTIME"
-fi
-
-# Clean stale Chrome Singleton locks (left by unclean shutdown, blocks headless Chrome startup)
-find "$CONFIG_RUNTIME/browser" -name 'SingletonLock' -delete 2>/dev/null || true
-find "$CONFIG_RUNTIME/browser" -name 'SingletonSocket' -delete 2>/dev/null || true
-find "$CONFIG_RUNTIME/browser" -name 'SingletonCookie' -delete 2>/dev/null || true
-
 # Ensure logs directory exists (OpenClaw uses it as /tmp/openclaw and /tmp/openclaw-1000 in container)
 mkdir -p "$AGENT_LOG_DIR"
-# When run as root (e.g. on Pi), logs mount must be owned by 1000 so OpenClaw's temp-dir trust check passes
+
+# When compose-up is run with sudo, container (uid 1000) must be able to read config and write logs/workspace.
+# Do not gate on HARDWARE_PROFILE=pi: sample-agent and any agent need this when run with sudo (e.g. Raspberry Pi).
 if [[ $(id -u) -eq 0 ]]; then
+  [[ -d "$CONFIG_RUNTIME" ]] && chown -R 1000:1000 "$CONFIG_RUNTIME"
   chown -R 1000:1000 "$AGENT_LOG_DIR"
+  [[ -d "$AGENT_WORKSPACE" ]] && chown -R 1000:1000 "$AGENT_WORKSPACE"
 fi
 
 # Prune large session files to prevent unbounded growth from heartbeats

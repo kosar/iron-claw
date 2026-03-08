@@ -18,7 +18,7 @@ if [[ -z "$OPENCLAW_GATEWAY_TOKEN" ]]; then
 fi
 
 echo "[$AGENT_NAME] Calling gateway at http://127.0.0.1:${AGENT_PORT}/v1/chat/completions ..."
-curl -sS "http://127.0.0.1:${AGENT_PORT}/v1/chat/completions" \
+curl -sS --max-time 30 "http://127.0.0.1:${AGENT_PORT}/v1/chat/completions" \
   -H "Authorization: Bearer $OPENCLAW_GATEWAY_TOKEN" \
   -H "Content-Type: application/json" \
   -H "x-openclaw-agent-id: main" \

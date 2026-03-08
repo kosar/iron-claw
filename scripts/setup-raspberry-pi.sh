@@ -367,20 +367,40 @@ do_configure_agent() {
   # Pi-friendly config fixes only when needed (idempotent, no regressions)
   if [[ -f "$config_json" ]]; then
     local config_changed=false
-    # controlUi: add dangerouslyAllowHostHeaderOriginFallback only if missing
-    if ! grep -q 'dangerouslyAllowHostHeaderOriginFallback' "$config_json"; then
-      sed -i 's/"controlUi": {/"controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true,/' "$config_json"
+    # controlUi: with bind "lan", OpenClaw requires explicit allowedOrigins (no dangerous fallback).
+    # Set allowedOrigins to localhost + 127.0.0.1 + optional LAN IP so the gateway starts securely.
+    local port
+    port="$(jq -r '.gateway.port // empty' "$config_json" 2>/dev/null)"
+    if [[ -z "$port" ]] && [[ -f "$IRONCLAW_ROOT/agents/$AGENT_NAME/agent.conf" ]]; then
+      port="$(grep -E '^AGENT_PORT=' "$IRONCLAW_ROOT/agents/$AGENT_NAME/agent.conf" 2>/dev/null | cut -d= -f2-)"
+    fi
+    port="${port:-18792}"
+    local origins="[\"http://localhost:${port}\", \"http://127.0.0.1:${port}\"]"
+    local lan_ip
+    lan_ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+    if [[ -n "$lan_ip" ]] && [[ "$lan_ip" != "127.0.0.1" ]]; then
+      origins="[\"http://localhost:${port}\", \"http://127.0.0.1:${port}\", \"http://${lan_ip}:${port}\"]"
+    fi
+    local current_origins
+    current_origins="$(jq -c '.gateway.controlUi.allowedOrigins // empty' "$config_json" 2>/dev/null)"
+    if [[ -z "$current_origins" ]] || [[ "$current_origins" == "[]" ]]; then
+      jq --argjson orig "$origins" '.gateway.controlUi.allowedOrigins = $orig' "$config_json" > "${config_json}.tmp" && mv "${config_json}.tmp" "$config_json"
       config_changed=true
     fi
-    # Telegram: only fix when gateway would fail (allowlist with empty allowFrom)
+    # Remove dangerous fallback if present (we use explicit origins only)
+    if grep -q 'dangerouslyAllowHostHeaderOriginFallback' "$config_json"; then
+      jq 'del(.gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback)' "$config_json" > "${config_json}.tmp" && mv "${config_json}.tmp" "$config_json"
+      config_changed=true
+    fi
+    # Telegram: only fix when gateway would fail (allowlist with empty allowFrom).
+    # Use placeholder ["0"] so validation passes but no one can message (0 is not a real Telegram user ID).
+    # Before enabling Telegram, user must replace 0 with their numeric user ID in allowFrom/groupAllowFrom.
     if grep -q '"dmPolicy": "allowlist"' "$config_json" && grep -q '"allowFrom": \[\]' "$config_json"; then
-      sed -i 's/"dmPolicy": "allowlist"/"dmPolicy": "open"/g' "$config_json"
-      sed -i 's/"allowFrom": \[\]/"allowFrom": ["*"]/g' "$config_json"
+      sed -i 's/"allowFrom": \[\]/"allowFrom": ["0"]/g' "$config_json"
       config_changed=true
     fi
     if grep -q '"groupPolicy": "allowlist"' "$config_json" && grep -q '"groupAllowFrom": \[\]' "$config_json"; then
-      sed -i 's/"groupPolicy": "allowlist"/"groupPolicy": "open"/g' "$config_json"
-      sed -i 's/"groupAllowFrom": \[\]/"groupAllowFrom": ["*"]/g' "$config_json"
+      sed -i 's/"groupAllowFrom": \[\]/"groupAllowFrom": ["0"]/g' "$config_json"
       config_changed=true
     fi
     # streaming key (some OpenClaw versions expect it) — only if streamMode present and streaming missing
@@ -427,6 +447,20 @@ do_compose_up() {
       log_step "Restarting container once to pick up config..."
       (cd "$IRONCLAW_ROOT" && docker_cmd compose -p "$AGENT_NAME" restart 2>/dev/null) || true
       log_ok "Done"
+    fi
+  fi
+
+  # If gateway still not responding, run OpenClaw doctor in the container to fix config and restart (world-class: we are the doctor)
+  test_out="$(cd "$IRONCLAW_ROOT" && "$IRONCLAW_ROOT/scripts/test-gateway-http.sh" "$AGENT_NAME" 2>&1)" || true
+  if echo "$test_out" | grep -q "Connection refused\|Connection reset\|Failed to connect\|Could not connect"; then
+    log_step "Gateway not responding yet. Running OpenClaw doctor --fix in the container..."
+    local cid
+    cid="$(docker_cmd ps -q -f "name=${AGENT_NAME}" 2>/dev/null | head -1)"
+    if [[ -n "$cid" ]]; then
+      (timeout 25 docker_cmd exec "$cid" sh -c 'export PATH="/home/ai_sandbox/.npm-global/bin:$PATH"; echo y | openclaw doctor --fix 2>/dev/null' 2>/dev/null) || true
+      run_sudo chown -R 1000:1000 "$IRONCLAW_ROOT/agents/$AGENT_NAME/config-runtime" 2>/dev/null || true
+      (cd "$IRONCLAW_ROOT" && docker_cmd compose -p "$AGENT_NAME" restart 2>/dev/null) || true
+      log_ok "Doctor run and container restarted; Step 8 will re-test the gateway."
     fi
   fi
 }
@@ -517,20 +551,42 @@ STARTScript
 do_verify_and_summary() {
   local svc_name="ironclaw-$AGENT_NAME.service"
   log_section "Step 8: Test the gateway and next steps"
-  echo "Running a real request to the OpenClaw gateway (chat completions endpoint) to confirm the agent is responding."
+  echo "Checking that the OpenClaw gateway is reachable, then sending one chat request."
   echo ""
 
   if [[ -x "$IRONCLAW_ROOT/scripts/test-gateway-http.sh" ]]; then
-    log_step "Calling gateway: one chat request to $AGENT_NAME..."
+    # Resolve agent to get AGENT_PORT for health check
+    local agent_port
+    if [[ -f "$IRONCLAW_ROOT/agents/$AGENT_NAME/agent.conf" ]]; then
+      agent_port="$(grep -E '^AGENT_PORT=' "$IRONCLAW_ROOT/agents/$AGENT_NAME/agent.conf" 2>/dev/null | cut -d= -f2-)"
+    fi
+    agent_port="${agent_port:-18792}"
+
+    log_step "Health check: GET http://127.0.0.1:${agent_port}/ ..."
+    local http_code
+    http_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 "http://127.0.0.1:${agent_port}/" 2>/dev/null)" || true
+    if [[ "$http_code" == "200" ]]; then
+      log_ok "Gateway is reachable (HTTP 200)."
+    else
+      log_warn "Gateway health check returned HTTP ${http_code:-none} (container may still be starting)."
+    fi
+    echo ""
+
+    log_step "Chat completions: one request to $AGENT_NAME (timeout 30s)..."
     local test_out
     test_out="$(cd "$IRONCLAW_ROOT" && "$IRONCLAW_ROOT/scripts/test-gateway-http.sh" "$AGENT_NAME" 2>&1)" || true
     if echo "$test_out" | grep -q "Connection refused\|Connection reset\|Failed to connect\|Could not connect"; then
-      log_fail "Gateway did not respond (connection error)."
-      echo ""
-      echo "  The container may still be starting, or OpenClaw may need config fixes."
-      echo "  Try in a minute: $IRONCLAW_ROOT/scripts/test-gateway-http.sh $AGENT_NAME"
-      echo "  If it still fails, run inside the container: sudo docker exec \$(sudo docker ps -q -f name=${AGENT_NAME}) openclaw doctor --fix"
-      echo "  Then: sudo docker restart \$(sudo docker ps -q -f name=${AGENT_NAME})"
+      if [[ "$http_code" == "200" ]]; then
+        log_warn "Gateway is up (health check passed) but the chat request failed. The chat endpoint may still be loading."
+        echo "  Try in a minute: $IRONCLAW_ROOT/scripts/test-gateway-http.sh $AGENT_NAME"
+      else
+        log_fail "Gateway did not respond (connection error)."
+        echo ""
+        echo "  The container may still be starting, or OpenClaw may need config fixes."
+        echo "  Try in a minute: $IRONCLAW_ROOT/scripts/test-gateway-http.sh $AGENT_NAME"
+        echo "  If it still fails, run inside the container: sudo docker exec \$(sudo docker ps -q -f name=${AGENT_NAME}) openclaw doctor --fix"
+        echo "  Then: sudo docker restart \$(sudo docker ps -q -f name=${AGENT_NAME})"
+      fi
     elif echo "$test_out" | grep -qE '\{|"id":|"choices"'; then
       log_ok "Gateway test passed. OpenClaw responded to a chat request."
       echo ""
@@ -561,9 +617,10 @@ do_verify_and_summary() {
   echo -e "${YELLOW}What you should do next:${RESET}"
   echo "  1. Set real secrets in $IRONCLAW_ROOT/agents/$AGENT_NAME/.env"
   echo "     (OPENCLAW_OWNER_DISPLAY_SECRET and, for cloud models, OPENAI_API_KEY)"
-  echo "  2. Log out and log back in (or reboot) so the docker group takes effect."
-  echo "  3. After reboot, check: sudo systemctl status $svc_name"
-  echo "  4. Test gateway: $IRONCLAW_ROOT/scripts/test-gateway-http.sh $AGENT_NAME"
+  echo "  2. Before enabling Telegram: in config/openclaw.json set allowFrom/groupAllowFrom to your numeric user ID(s) (not the placeholder 0). Keep dmPolicy/groupPolicy as allowlist."
+  echo "  3. Log out and log back in (or reboot) so the docker group takes effect."
+  echo "  4. After reboot, check: sudo systemctl status $svc_name"
+  echo "  5. Test gateway: $IRONCLAW_ROOT/scripts/test-gateway-http.sh $AGENT_NAME"
   echo ""
   echo -e "${GREEN}Setup complete. You can be proud of this Pi.${RESET}"
   echo ""

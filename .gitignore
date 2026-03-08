@@ -36,6 +36,8 @@ agents/*/workspace/onboarding-log.md
 # Productwatcher runtime vault (watches, health, market data)
 agents/*/workspace/skills/productwatcher/watcher_vault/
 
+# OpenClaw workspace runtime state (onboarding timestamp, etc. — do not commit)
+agents/*/workspace/.openclaw/
 # Nested workspace/workspace/ — created when a skill writes paths relative to
 # the workspace mount instead of .openclaw root (path bug, gitignore the artifact)
 agents/*/workspace/workspace/

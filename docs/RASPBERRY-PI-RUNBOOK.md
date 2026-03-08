@@ -96,26 +96,36 @@ Gateway failed to start: Error: non-loopback Control UI requires gateway.control
 (set explicit origins), or set gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true
 ```
 
-**Fix:** In the agent’s gateway config (e.g. `agents/pibot/config/openclaw.json`), inside the `"gateway"` object, add:
+**Fix (preferred — secure):** Use explicit `allowedOrigins` only. In the agent’s gateway config (e.g. `agents/pibot/config/openclaw.json`), inside the `"gateway"` object, add:
 
 ```json
-"controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true }
+"controlUi": {
+  "allowedOrigins": [
+    "http://localhost:18791",
+    "http://127.0.0.1:18791"
+  ]
+}
 ```
 
-So the gateway block looks like:
+(Use your agent’s port instead of 18791.) So the gateway block looks like:
 
 ```json
 "gateway": {
   "port": 18791,
   "mode": "local",
   "bind": "lan",
-  "controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true },
+  "controlUi": {
+    "allowedOrigins": [
+      "http://localhost:18791",
+      "http://127.0.0.1:18791"
+    ]
+  },
   "auth": { "mode": "token", "token": "${OPENCLAW_GATEWAY_TOKEN}" },
   ...
 }
 ```
 
-**Why this is needed:** With `bind: "lan"`, the Control UI is considered “non-loopback.” OpenClaw then requires either a list of allowed origins or this fallback (which uses the request’s Host header). We use the fallback so the gateway can start in Docker without extra hostname/origin config. This is a **one-time config change** per agent (or in the template so new agents get it). The template has been updated so new agents from template already include it; existing pibot already has it.
+**Why bind is "lan":** With `bind: "lan"`, the gateway listens on all interfaces inside the container so Docker port mapping works. With `bind: "loopback"`, OpenClaw would bind only to 127.0.0.1 inside the container and Docker could not forward host traffic — you’d get “Empty reply from server.” So we keep `bind: "lan"` and satisfy the non-loopback requirement with explicit **allowedOrigins** (no `dangerouslyAllowHostHeaderOriginFallback`). To access the Control UI from another machine on the LAN, add that origin (e.g. `http://192.168.1.5:18791`) to `allowedOrigins`. The setup script sets these for you when needed.
 
 ---
 
@@ -251,7 +261,7 @@ Edit `~/.config/autostart/ironclaw-dashboard.desktop` and set `Exec=` to the ful
 | 2 | Image tag vs template | Ensure `scripts/docker-compose.yml.tmpl` has `image: ironclaw:2.0` (or the tag you build) |
 | 3 | Build image | `cd ~/ironclaw && docker build -t ironclaw:2.0 .` |
 | 4 | Configure .env | Edit `agents/pibot/.env`: gateway token, owner secret, OpenAI, Moonshot, Telegram token |
-| 5 | Gateway Control UI | In `agents/pibot/config/openclaw.json`, gateway section: add `"controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true }` (template already has it for new agents) |
+| 5 | Gateway Control UI | In `agents/pibot/config/openclaw.json`, gateway section: add `"controlUi": { "allowedOrigins": ["http://localhost:PORT", "http://127.0.0.1:PORT"] }` with your agent port (template has it for new agents). Do not use dangerouslyAllowHostHeaderOriginFallback. |
 | 6 | Start container | `./scripts/compose-up.sh pibot -d` (or `sudo ...` if not in docker group) |
 | 7 | Verify | `./scripts/test-gateway-http.sh pibot` → JSON with “pibot is working.” |
 | 8 | Start at boot | `sudo cp scripts/systemd/ironclaw-pibot.service /etc/systemd/system/` then `daemon-reload` and `enable` |
@@ -283,8 +293,8 @@ Edit `~/.config/autostart/ironclaw-dashboard.desktop` and set `Exec=` to the ful
 
 - **What:** OpenClaw (recent versions) require an explicit Control UI setting when the gateway is bound to a non-loopback address (`bind: "lan"`).
 - **Effect:** Without it, the gateway process exits at startup with the “non-loopback Control UI requires…” error. The container stays up but the gateway never listens, so you get “Connection reset by peer” or no response.
-- **Fix:** Add `"controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true }` inside the `gateway` object. This is now in the **template** as well, so new agents get it. Pibot already has it in this repo.
-- **Going forward:** Any agent using `bind: "lan"` (e.g. in Docker or on a LAN IP) should have this in its gateway config; the template now includes it by default.
+- **Fix:** Add `"controlUi": { "allowedOrigins": ["http://localhost:PORT", "http://127.0.0.1:PORT"] }` inside the `gateway` object (use your agent’s port). The template has this for new agents. Do not use `dangerouslyAllowHostHeaderOriginFallback`.
+- **Going forward:** Any agent using `bind: "lan"` (e.g. in Docker or on a LAN IP) should have explicit `allowedOrigins` in its gateway config; the template includes it by default.
 
 ---
 

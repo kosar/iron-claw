@@ -183,13 +183,13 @@
     "telegram": {
       "enabled": false,
       "dmPolicy": "allowlist",
-      "allowFrom": [],
+      "allowFrom": ["0"],
       "groupPolicy": "allowlist",
-      "groupAllowFrom": [],
+      "groupAllowFrom": ["0"],
       "groups": {
         "*": { "requireMention": true }
       },
-      "streamMode": "partial",
+      "streaming": "partial",
       "botToken": "not-configured"
     }
   },

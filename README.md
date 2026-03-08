@@ -74,7 +74,7 @@ You can [review the script in this repo](scripts/setup-raspberry-pi.sh) before r
 curl -sSL https://raw.githubusercontent.com/kosar/iron-claw/main/scripts/setup-raspberry-pi.sh | bash
 ```
 
-Options: `bash -s -- --yes` (non-interactive), `--help`, `--dry-run`. See the script header for details. After it finishes, set real secrets in `~/ironclaw/agents/sample-agent/.env`, then log out and back in (so the `docker` group applies) and optionally reboot to verify start-on-boot.
+Options: `bash -s -- --yes` (non-interactive), `--help`, `--dry-run`. See the script header for details. After it finishes, set real secrets in `~/ironclaw/agents/sample-agent/.env`, then log out and back in (so the `docker` group applies) and optionally reboot to verify start-on-boot. **Before enabling Telegram** (or any channel), set `channels.telegram.allowFrom` to your numeric user ID(s) in `agents/sample-agent/config/openclaw.json` — the setup uses a placeholder so the gateway starts; keep `dmPolicy`/`groupPolicy` as `allowlist` so only approved contacts can message. See [SECURITY.md](SECURITY.md) and OpenClaw docs on DM policies.
 
 ## Project layout
 
@@ -155,7 +155,7 @@ On detached start, `learning-log-bridge.sh` runs unless `IRONCLAW_DISABLE_LEARNI
 
 - **Permission denied**: containers run as UID 1000. Ensure config-runtime, workspace, and logs are writable. On Pi with sudo, compose-up chowns config-runtime when `HARDWARE_PROFILE=pi`.
 - **Ollama unreachable**: ensure Ollama listens on the expected interface (for example `0.0.0.0` for host.docker.internal).
-- **Gateway won’t start with bind: lan**: add `"controlUi": { "dangerouslyAllowHostHeaderOriginFallback": true }` in the gateway section of `openclaw.json` (see [docs/RASPBERRY-PI-RUNBOOK.md](docs/RASPBERRY-PI-RUNBOOK.md)).
+- **Gateway won’t start with bind: lan**: set explicit `"controlUi": { "allowedOrigins": ["http://localhost:PORT", "http://127.0.0.1:PORT"] }` in the gateway section of `openclaw.json` (see [docs/RASPBERRY-PI-RUNBOOK.md](docs/RASPBERRY-PI-RUNBOOK.md)). Do **not** use `dangerouslyAllowHostHeaderOriginFallback`; explicit origins are sufficient and secure. Bind must stay `"lan"` for Docker port mapping to work.
 - **Port conflict**: each agent needs a unique port. `create-agent.sh` assigns the next free one.
 
 ## Advanced: autonomous behavior and optional features
