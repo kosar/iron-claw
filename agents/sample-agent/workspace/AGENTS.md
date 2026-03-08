@@ -37,7 +37,7 @@ When a skill's SKILL.md defines a pipeline (Step 1 through Step N), you MUST exe
 When a custom skill exists for a task (defined in `workspace/skills/*/SKILL.md`), ALWAYS use that skill instead of a built-in tool that does something similar. Custom skills have domain-specific pipelines, logging, and persistent knowledge that built-in tools lack.
 
 Examples:
-- Product/store queries → use shopify-nexus skill, NOT raw web_fetch
+- Product/store queries (Shopify stores) → use shopify-nexus skill first (MCP + fallback). For watch lists use productwatcher. NOT raw web_fetch for structured product/policy lookups.
 - Any task with a matching skill → follow that skill's SKILL.md pipeline
 
 ### Rule 6: Offer, don't ask

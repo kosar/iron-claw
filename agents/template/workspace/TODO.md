@@ -101,7 +101,7 @@ in `workspace/onboarding-log.md`. Chat channels are always kept clean — no onb
 **Example (ironclaw-bot):**
 > - Golden rule: always deliver an answer, never ask before searching
 > - Web content: web_fetch first, browser for JS-heavy sites
-> - Product queries: shopify-nexus MCP first, web fallback
+> - Product queries (Shopify): shopify-nexus skill first, web fallback. Watch lists: productwatcher.
 > - Weather: exec with wttr.in curl command
 > - If a tool fails, fall back silently — never expose internals to the user
 

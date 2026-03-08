@@ -1,6 +1,23 @@
 # Tools and skills for OpenClaw agents
 
-This project runs the OpenClaw gateway in Docker. Agents get **built-in tools** (from the OpenClaw runtime) and can use **skills** (bundled with the image or installed separately). This doc includes a section tailored to the image we use: **ghcr.io/phioranex/openclaw-docker:latest** (bundled skills and weather = no API key).
+This project runs the OpenClaw gateway in Docker. Agents get **built-in tools** (from the OpenClaw runtime) and can use **skills** (in `workspace/skills/` or bundled with the image). Below: skills in this repo, then OpenClaw’s built-in tools and image skills.
+
+---
+
+## Skills in this repo (`workspace/skills/`)
+
+These live under `agents/template/workspace/skills/` and `agents/sample-agent/workspace/skills/`. Enable or disable in `config/openclaw.json` under `skills.entries`.
+
+| Skill | Description |
+|-------|-------------|
+| **productwatcher** | Product/watch lists; Shopify MCP provider, brave_search, direct_scrape, browser_automation. See `docs/shopify-nexus/` for Shopify context. |
+| **shopify-nexus** | Optional built-in (reference). Shopify product/policy search via MCP + products.json fallback; optional Chatsi Genius. SSRF checks, nexus-knowledge.md learning. Disabled by default. |
+| **fashion-radar** | Optional built-in (reference). Trend intelligence from fashion editorial; trend-intelligence.md, fashion-log.sh. Disabled by default. |
+| **style-profile** | Optional built-in (reference). Per-customer style memory (sizes, preferences, brands); customer-profiles.md, profile-manager.sh. Disabled by default. |
+| **llm-manager** | Optional built-in (reference). Runtime model tier switching (tiers.json, switch-tier.sh); writes to `model_switches.log`. Disabled by default. |
+| **restaurant-scout** | Reservations, deep links (Resy, OpenTable, etc.). Needs web search. Disabled by default. |
+| **daily-report** | Daily activity reports from logs; AI summary. Run as `python3 skills/daily-report/daily-report.py main`. |
+| **send-email**, **weather**, **image-gen**, **image-vision**, **pdf-reader**, **ir-blast**, **piglow-signal**, **piface-display**, **camera-capture**, **rfid-reader**, **four-agreements** | See each skill’s SKILL.md under `workspace/skills/`. |
 
 ---
 

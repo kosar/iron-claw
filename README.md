@@ -113,7 +113,7 @@ Typical setup: a primary cloud model (e.g. OpenAI, Moonshot), an optional heartb
 
 ## Tools and skills
 
-Built-in tools: `exec`, `read`, `write`, `edit`, `web_fetch`, `browser`, `memory_search`, `sessions_list`, `cron`, `image`, `message`. Custom skills live under `workspace/skills/{name}/` (SKILL.md + scripts). See [docs/TOOLS-AND-SKILLS.md](docs/TOOLS-AND-SKILLS.md).
+Built-in tools: `exec`, `read`, `write`, `edit`, `web_fetch`, `browser`, `memory_search`, `sessions_list`, `cron`, `image`, `message`. Custom skills live under `workspace/skills/{name}/` (SKILL.md + scripts). The template and sample-agent include optional IronClaw built-ins ported from the reference codebase: **shopify-nexus** (Shopify MCP product/policy search, optional Chatsi Genius), **fashion-radar** (trend intelligence), **style-profile** (per-customer style memory), and **llm-manager** (runtime model tier switching). All four are disabled by default; enable in `config/openclaw.json` under `skills.entries`. See [docs/TOOLS-AND-SKILLS.md](docs/TOOLS-AND-SKILLS.md).
 
 ## Raspberry Pi and exec
 

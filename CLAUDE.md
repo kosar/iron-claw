@@ -333,12 +333,13 @@ Custom skills live in `workspace/skills/{skill-name}/` and follow a pipeline pat
 - `scripts/` — shell scripts for logging, MCP clients, data fetching
 - Knowledge files (e.g., `nexus-knowledge.md`, `trend-intelligence.md`) — persistent learning that improves over time
 
-Existing custom skills:
-- **shopify-nexus** (sample-agent, sample-agent) — Shopify MCP product discovery with silent fallback for non-Shopify stores
-- **fashion-radar** (sample-agent) — trend intelligence from fashion editorial sources
-- **style-profile** (sample-agent) — per-customer style memory (sizes, preferences, brands)
-- **llm-manager** (sample-agent) — runtime model tier switching (flagship/worker/efficiency/reasoning/coding) via `switch-tier.sh`; logs switches to `/tmp/openclaw/model_switches.log`; changes are session-scoped and reset on restart
-- **daily-report** (sample-agent) — generates daily activity reports from logs; includes AI summary via gateway `/v1/chat/completions`; run as `python3 skills/daily-report/daily-report.py main`
+Existing custom skills (template and sample-agent):
+- **shopify-nexus** — Ported from reference. Shopify MCP product/policy search, products.json fallback, optional Chatsi Genius; SSRF checks, nexus-knowledge.md. Disabled by default; enable in `skills.entries`.
+- **fashion-radar** — Ported from reference. Trend intelligence from fashion editorial; trend-intelligence.md, fashion-log.sh. Disabled by default.
+- **style-profile** — Ported from reference. Per-customer style memory (sizes, preferences, brands); customer-profiles.md, profile-manager.sh. Disabled by default.
+- **llm-manager** — Ported from reference. Runtime model tier switching (tiers.json, switch-tier.sh); logs to `/tmp/openclaw/model_switches.log`; session-scoped. Disabled by default.
+- **productwatcher** — Product/watch lists; Shopify MCP provider, brave_search, direct_scrape, browser_automation.
+- **restaurant-scout**, **daily-report**, **send-email**, **weather**, **image-gen**, **image-vision**, **pdf-reader**, Pi skills (**ir-blast**, **piglow-signal**, **piface-display**, **camera-capture**, **rfid-reader**), **four-agreements** — See `docs/TOOLS-AND-SKILLS.md`.
 
 ### Template Behavioral Enforcement
 

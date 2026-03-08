@@ -207,7 +207,11 @@
   },
   "skills": {
     "entries": {
-      "restaurant-scout": { "enabled": false }
+      "restaurant-scout": { "enabled": false },
+      "shopify-nexus": { "enabled": false },
+      "fashion-radar": { "enabled": false },
+      "style-profile": { "enabled": false },
+      "llm-manager": { "enabled": false }
     }
   },
   "tools": {
