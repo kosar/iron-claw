@@ -212,7 +212,8 @@
       "shopify-nexus": { "enabled": false },
       "fashion-radar": { "enabled": false },
       "style-profile": { "enabled": false },
-      "llm-manager": { "enabled": false }
+      "llm-manager": { "enabled": false },
+      "autoresearch": { "enabled": true }
     }
   },
   "tools": {

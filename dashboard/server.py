@@ -110,6 +110,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
             ok, data = run_probe("probe-rfid.sh", {"AGENT_NAME": agent})
         elif path == "/api/learning":
             ok, data = run_probe("probe-learning.sh", {"AGENT_NAME": agent})
+        elif path == "/api/autoresearch":
+            ok, data = run_probe("probe-autoresearch.sh", {"AGENT_NAME": agent})
         else:
             self._send_json(404, {"ok": False, "error": "unknown endpoint"})
             return

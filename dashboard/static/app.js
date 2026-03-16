@@ -52,7 +52,7 @@
   }
 
   function fillAgentSelects(agents, primaryAgent) {
-    ['logAgent', 'failAgent', 'usageAgent', 'learningAgent'].forEach(id => {
+    ['logAgent', 'failAgent', 'usageAgent', 'learningAgent', 'researchAgent'].forEach(id => {
       const sel = el(id);
       if (!sel || !agentList.length) return;
       const cur = sel.value;
@@ -147,6 +147,36 @@
       html += '</tbody></table></div>';
     }
 
+    node.innerHTML = html;
+  }
+
+  function renderAutoresearch(data) {
+    const node = el('autoresearch');
+    if (!data || data.ok !== true) {
+      node.textContent = (data && data.error) || '—';
+      node.className = 'card error';
+      return;
+    }
+
+    node.className = 'card research-card';
+    if (!data.enabled) {
+      const reason = data.reason || 'research data not available';
+      node.innerHTML = '<div class="learning-muted">No research data yet for ' + escapeHtml(data.agent || '') + ': ' + escapeHtml(reason) + '.</div>';
+      return;
+    }
+
+    const c = data.config || {};
+    const last = data.lastResult || {};
+    let html = '';
+    html += '<div class="learning-summary">';
+    html += '<div><strong>Experiment:</strong> ' + escapeHtml(c.name || '—') + '</div>';
+    html += '<div><strong>Metric:</strong> ' + escapeHtml(c.metricName || 'metric') + ' (' + escapeHtml(c.bestDirection || 'lower') + ')</div>';
+    html += '<div><strong>Runs in segment:</strong> ' + escapeHtml(String(data.count || 0)) + '</div>';
+    
+    if (last && last.metric != null) {
+      html += '<div class="learning-signal"><strong>Latest Result:</strong> ' + escapeHtml(last.status) + ' (' + escapeHtml(String(last.metric)) + ') — ' + escapeHtml(last.description || '') + '</div>';
+    }
+    html += '</div>';
     node.innerHTML = html;
   }
 
@@ -270,6 +300,7 @@
       fillAgentSelects(agents.ok ? agents.agents : null, primary);
       var selected = (el('logAgent') && el('logAgent').value) ? el('logAgent').value : primary;
       var selectedLearning = (el('learningAgent') && el('learningAgent').value) ? el('learningAgent').value : selected;
+      var selectedResearch = (el('researchAgent') && el('researchAgent').value) ? el('researchAgent').value : selected;
       return Promise.all([
         Promise.resolve(agents),
         fetchJson('/api/bridges'),
@@ -281,9 +312,10 @@
         fetchJson('/api/channels?agent=' + encodeURIComponent(selected)),
         fetchJson('/api/rfid?agent=' + encodeURIComponent(selected)),
         fetchJson('/api/learning?agent=' + encodeURIComponent(selectedLearning)),
+        fetchJson('/api/autoresearch?agent=' + encodeURIComponent(selectedResearch)),
       ]);
     }).then(function (results) {
-      var agents = results[0], bridges = results[1], docker = results[2], logs = results[3], failures = results[4], usage = results[5], gw = results[6], channels = results[7], rfid = results[8], learning = results[9];
+      var agents = results[0], bridges = results[1], docker = results[2], logs = results[3], failures = results[4], usage = results[5], gw = results[6], channels = results[7], rfid = results[8], learning = results[9], research = results[10];
       renderBridges(bridges);
       renderDocker(docker);
       renderLogs(logs);
@@ -293,6 +325,7 @@
       renderChannels(channels);
       renderRfid(rfid);
       renderLearning(learning);
+      renderAutoresearch(research);
     }).catch(function () {});
 
     el('lastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
@@ -312,6 +345,7 @@
   el('failAgent').addEventListener('change', refreshAll);
   el('usageAgent').addEventListener('change', refreshAll);
   el('learningAgent').addEventListener('change', refreshAll);
+  el('researchAgent').addEventListener('change', refreshAll);
   el('logN').addEventListener('change', refreshAll);
 
   el('hostInfo').textContent = window.location.hostname + ':' + (window.location.port || '80');
